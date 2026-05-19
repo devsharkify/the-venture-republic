@@ -1,0 +1,125 @@
+{
+  "summary": "Iteration 21: Telegram bot integration and ePaper PDF download testing. Backend: 14/15 tests passed (93%). Telugu PDF generation fails due to fontTools library bug with Unicode range 123. English PDF download works correctly (45KB). Telegram bot routes functional. telegram_scheduler process RUNNING. Frontend ePaper page works - PDF download button visible and downloads successfully.",
+
+  "backend_issues": {
+    "critical": [
+      {
+        "endpoint": "GET /api/epaper/{date}/pdf?lang=te",
+        "issue": "Telugu PDF returns 500 due to fontTools ValueError: expected 0 <= int <= 122, found: 123 (library bug with Telugu Unicode ranges)",
+        "priority": "HIGH",
+        "root_cause": "fontTools 4.61.1 has a bug in subset.py _prune_post_subset() where setUnicodeRanges() rejects bit 123 which is valid for Telugu script"
+      }
+    ],
+    "minor": []
+  },
+
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+
+  "test_results": {
+    "passed_tests": [
+      "GET /api/health returns ok",
+      "GET /api/telegram/config returns bot_configured:true",
+      "POST /api/telegram/send-report/morning generates report text",
+      "POST /api/telegram/send-report/evening generates report text",
+      "POST /api/telegram/send-pdf endpoint works (returns failed if no admin_chat_id)",
+      "POST /api/telegram/send-pdf with params (date/slot/lang) works",
+      "GET /api/epaper/{date}/pdf?lang=en&slot=morning returns PDF (200, ~46KB)",
+      "GET /api/epaper/{date}/pdf?lang=en&slot=evening returns PDF",
+      "GET /api/epaper/editions returns edition list",
+      "GET /api/epaper/{date} returns edition content",
+      "POST /api/telegram/webhook handles empty message",
+      "POST /api/telegram/webhook handles /start command",
+      "GET /api/agents/editor/latest returns data",
+      "GET /api/agents/investigator/topics returns topics"
+    ],
+    "failed_tests": [
+      "GET /api/epaper/{date}/pdf?lang=te - 500 Internal Server Error (fontTools bug)"
+    ],
+    "skipped_tests": []
+  },
+
+  "feature_verification": {
+    "telegram_bot": {
+      "bot_token_configured": true,
+      "config_endpoint": "Returns bot_configured:true",
+      "send_report_endpoints": "Working (returns failed without admin_chat_id which is expected)",
+      "send_pdf_endpoint": "Working",
+      "webhook_endpoint": "Working, handles /start and other commands",
+      "admin_chat_id": "null (user needs to /start @Kaizernewsbot)"
+    },
+    "telegram_scheduler": {
+      "process_status": "RUNNING (pid 3711)",
+      "schedule": "6 AM IST morning report, 6 PM IST evening report",
+      "log_file": "/var/log/supervisor/telegram.err.log shows 'Telegram scheduler started'"
+    },
+    "epaper_pdf": {
+      "english_pdf": "WORKING - generates ~45KB PDF with text-only content (images removed for speed)",
+      "telugu_pdf": "BROKEN - fontTools library bug with Unicode ranges",
+      "frontend_download": "WORKING - PDF button visible, download triggered successfully"
+    },
+    "agents_page": {
+      "loads_at_/agents": true,
+      "editor_section_visible": true,
+      "investigator_section_visible": true
+    }
+  },
+
+  "test_report_links": [
+    "/app/backend/tests/test_telegram_epaper.py",
+    "/app/test_reports/pytest/telegram_epaper_results.xml"
+  ],
+
+  "action_items": [
+    "FIX: Telugu PDF generation - fontTools 4.61.1 bug with Unicode bit 123. Options: (1) Downgrade fontTools to <4.50, (2) Add try/except wrapper in PDF generation to skip font subsetting, (3) Use a different Telugu font"
+  ],
+
+  "critical_code_review_comments": [
+    "telegram_bot.py: BOT_TOKEN and ADMIN_CHAT_ID properly loaded from env/db",
+    "telegram_scheduler.py: Correctly runs as standalone subprocess with asyncio.run()",
+    "epaper.py PDF endpoint: Images removed (line 352: img_html = '') for faster generation - GOOD",
+    "EpaperPage.jsx: PDF download has 60s timeout - GOOD"
+  ],
+
+  "updated_files": [
+    "/app/backend/tests/test_telegram_epaper.py"
+  ],
+
+  "success_rate": {
+    "backend": "93% (14/15 passed)",
+    "frontend": "100%"
+  },
+
+  "test_credentials": {
+    "admin_phone": "9876543210",
+    "admin_otp": "123456"
+  },
+
+  "seed_data_creation": "None needed - existing articles used for testing",
+
+  "retest_needed": true,
+
+  "should_main_agent_self_test": false,
+
+  "context_for_next_testing_agent": "Telegram bot integration complete. telegram_scheduler running as supervisor process. English PDF download works. Telugu PDF BROKEN due to fontTools 4.61.1 library bug (ValueError: expected 0 <= int <= 122, found: 123). Main agent needs to fix Telugu PDF generation - consider downgrading fontTools or adding error handling.",
+
+  "mocked_apis": {
+    "has_mocked_apis": true,
+    "mocked_apis_list": ["Admin OTP 123456 for phone 9876543210"]
+  },
+
+  "rca_of_the_issue": {
+    "issue": "Telugu PDF generation 500 error",
+    "reproduction": "GET /api/epaper/{date}/pdf?lang=te&slot=morning",
+    "root_cause": "fontTools 4.61.1 subsetter raises ValueError in _prune_post_subset() when processing Telugu font glyphs. The Unicode range bit 123 is used for certain Telugu characters but fontTools.subset validates range 0-122 only",
+    "stack_trace_location": "/root/.venv/lib/python3.11/site-packages/fontTools/subset/__init__.py line 3812",
+    "potential_fixes": [
+      "Downgrade fontTools to version <4.50 where this validation didn't exist",
+      "Wrap PDF generation in try/except and use fallback for Telugu",
+      "Configure WeasyPrint to skip font subsetting: font_config.add_font_face()"
+    ]
+  }
+}

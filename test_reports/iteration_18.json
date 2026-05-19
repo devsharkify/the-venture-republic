@@ -1,0 +1,102 @@
+{
+  "summary": "Iteration 18: Verified ePaper language separation fix and scraper functionality. Bug fix confirmed - Telugu ePaper now shows ONLY Telugu content (no English cached title leakage). All 11 backend tests passed (100%). Frontend UI verified with Playwright - language toggle switches between Telugu and English modes correctly.",
+
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+
+  "test_results": {
+    "passed_tests": [
+      "GET /api/health returns ok",
+      "GET /api/scraper/status returns status info",
+      "GET /api/epaper/editions returns 69 editions",
+      "Telugu ePaper (lang=te) has ONLY Telugu titles",
+      "Telugu ePaper summaries contain Telugu text (100%)",
+      "English ePaper (lang=en) has NO Telugu titles",
+      "English ePaper summaries have NO Telugu text",
+      "ePaper returns articles with proper structure",
+      "ePaper summaries are >100 chars (quality check)",
+      "POST /api/scraper/trigger works (completed status)",
+      "Language-specific title cache prevents English→Telugu leak"
+    ],
+    "failed_tests": [],
+    "skipped_tests": []
+  },
+
+  "feature_verification": {
+    "language_separation_fix": {
+      "issue_fixed": "English cached titles (epaper_title) were leaking into Telugu ePaper",
+      "fix_applied": "Cache keys are now language-specific: epaper_title_en and epaper_title_te",
+      "safety_check_added": "Lines 259-264 in epaper.py ensure Telugu titles aren't overwritten",
+      "verified": true
+    },
+    "telugu_epaper": {
+      "has_only_telugu_content": true,
+      "no_english_titles": true,
+      "no_english_summaries": true,
+      "ui_verified": true
+    },
+    "english_epaper": {
+      "has_only_english_content": true,
+      "no_telugu_titles": true,
+      "no_telugu_summaries": true,
+      "ui_verified": true
+    },
+    "scrapers_working": {
+      "toi": "232 articles in DB",
+      "siasat": "178 articles in DB",
+      "eenadu": "160 articles in DB (Telugu)",
+      "deccanchronicle": "123 articles in DB",
+      "way2news": "85 articles in DB (Telugu)",
+      "trigger_endpoint": "Returns completed with 0 new (all scraped)",
+      "status_endpoint": "Returns running/last_run/articles_added"
+    }
+  },
+
+  "test_report_links": [
+    "/app/backend/tests/test_epaper_language_scrapers.py",
+    "/app/test_reports/pytest/epaper_language_scrapers.xml"
+  ],
+
+  "action_items": [],
+
+  "critical_code_review_comments": [
+    "Language-specific cache keys (epaper_title_en/te) properly separate translated titles",
+    "Safety check at lines 259-264 ensures Telugu title is restored if English cached title leaks",
+    "_has_telugu() helper correctly detects Telugu Unicode range (0C00-0C7F)",
+    "All 5 scrapers (TOI, Siasat, Eenadu, Deccan Chronicle, Way2News) have articles in DB"
+  ],
+
+  "updated_files": [
+    "/app/backend/tests/test_epaper_language_scrapers.py"
+  ],
+
+  "success_rate": {
+    "backend": "100% (11/11 passed)",
+    "frontend": "100%"
+  },
+
+  "test_credentials": {
+    "guest": "No login required - navigate directly to /epaper"
+  },
+
+  "seed_data_creation": "Used existing data - 2026-03-08 morning edition (96 articles in Telugu, 96 in English)",
+
+  "retest_needed": false,
+
+  "should_main_agent_self_test": false,
+
+  "context_for_next_testing_agent": "Language separation bug FIXED. The fix changes cache keys from 'epaper_title' to 'epaper_title_{lang}' (epaper_title_en for English, epaper_title_te for Telugu). Safety check in epaper.py lines 259-264 ensures if English cached title somehow gets set for Telugu mode, it falls back to raw title_te. All scrapers working - 778 total articles across 5 sources. Test file: test_epaper_language_scrapers.py verifies language isolation.",
+
+  "mocked_apis": {
+    "has_mocked_apis": true,
+    "mocked_apis_list": ["Admin OTP verification uses hardcoded OTP 123456 for phone 9876543210"]
+  }
+}

@@ -1,0 +1,118 @@
+{
+  "summary": "Iteration 20: Complete testing of AI Agents feature (News Editor Agent + Investigative Reporter Agent). All 15 backend API tests passed (100%). Frontend UI verified - Editor section shows editorial, hero stories, duplicates. Investigator section shows 3 topics with Run/View Report buttons. Report view displays investigation report with event timeline. Agents run as subprocesses (non-blocking) using Gemini Flash LLM.",
+
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+
+  "test_results": {
+    "passed_tests": [
+      "GET /api/health returns ok",
+      "GET /api/agents/editor/latest returns editor report with editorial_en, editorial_te, hero_picks, duplicate_groups",
+      "POST /api/agents/editor/run starts editor agent (status:started, non-blocking)",
+      "Server responsive after starting editor agent",
+      "GET /api/agents/editor/reports returns list of reports",
+      "GET /api/agents/investigator/topics returns 3 topics (telangana-politics, india-politics, corruption)",
+      "POST /api/agents/investigator/run/telangana-politics starts investigation (non-blocking)",
+      "GET /api/agents/investigator/report/telangana-politics returns report with report_en, report_te, events",
+      "GET /api/agents/investigator/report/india-politics returns report",
+      "GET /api/agents/investigator/report/corruption returns report",
+      "GET /api/agents/investigator/timeline/telangana-politics returns events list with title, summary, source",
+      "Server responsive after starting investigation",
+      "POST /api/agents/investigator/run-all starts all investigations",
+      "Bilingual content verified (EN + TE) in editor reports",
+      "Bilingual content verified (EN + TE) in investigation reports"
+    ],
+    "failed_tests": [],
+    "skipped_tests": []
+  },
+
+  "feature_verification": {
+    "news_editor_agent": {
+      "editor_latest_api": "Returns editorial_en, editorial_te, hero_picks, duplicate_groups, hero_articles",
+      "editor_run_api": "POST starts subprocess, returns immediately with status:started",
+      "non_blocking": true,
+      "bilingual_editorial": true,
+      "articles_analyzed": 30,
+      "hero_stories_detected": 3,
+      "duplicates_detected": 2
+    },
+    "investigative_reporter_agent": {
+      "topics_api": "Returns 3 topics with id, name_en, name_te, keywords, event_count",
+      "run_investigation_api": "POST starts subprocess, returns immediately",
+      "report_api": "Returns report_en, report_te, events array, topic info",
+      "timeline_api": "Returns events with title, summary, source, published_at, image",
+      "topics_configured": ["telangana-politics", "india-politics", "corruption"],
+      "events_tracked": {
+        "telangana-politics": 25,
+        "india-politics": 30,
+        "corruption": 30
+      },
+      "bilingual_reports": true
+    },
+    "subprocess_execution": {
+      "python_path": "/root/.venv/bin/python3",
+      "script_path": "/app/backend/run_agents.py",
+      "log_files": ["/tmp/agent_editor.log", "/tmp/agent_invest_*.log"],
+      "llm_model": "gemini-2.5-flash"
+    },
+    "frontend_ui": {
+      "agents_dashboard_loads": true,
+      "editor_section_visible": true,
+      "run_editor_button_works": true,
+      "investigator_section_visible": true,
+      "topic_cards_display": "3 topics with Run Investigation and View Report buttons",
+      "report_view_displays": true,
+      "event_timeline_displays": "25+ events with images, titles, summaries, sources",
+      "bottom_nav_agents_tab": true
+    }
+  },
+
+  "test_report_links": [
+    "/app/backend/tests/test_agents_api.py",
+    "/app/test_reports/pytest/agents_api_results.xml"
+  ],
+
+  "action_items": [],
+
+  "critical_code_review_comments": [
+    "agents.py correctly uses subprocess.Popen for non-blocking agent execution",
+    "run_agents.py is standalone script with proper asyncio.run() entry point",
+    "All MongoDB queries exclude _id field with {\"_id\": 0} projection",
+    "LLM calls have 25-30 second timeout to prevent blocking",
+    "data-testid attributes present on all interactive elements"
+  ],
+
+  "updated_files": [
+    "/app/backend/tests/test_agents_api.py"
+  ],
+
+  "success_rate": {
+    "backend": "100% (15/15 passed)",
+    "frontend": "100%"
+  },
+
+  "test_credentials": {
+    "note": "No login required for agents dashboard"
+  },
+
+  "seed_data_creation": "Agents have already been run - editor_reports, investigation_events, investigation_reports collections populated",
+
+  "retest_needed": false,
+
+  "should_main_agent_self_test": false,
+
+  "context_for_next_testing_agent": "AI Agents feature VERIFIED. News Editor Agent analyzes articles, detects duplicates, generates bilingual editorials. Investigative Reporter tracks 3 topics (Telangana Politics, India Politics, Corruption) with event timelines and bilingual reports. Agents run as subprocesses to avoid blocking server. Test file: test_agents_api.py",
+
+  "mocked_apis": {
+    "has_mocked_apis": true,
+    "mocked_apis_list": ["Admin OTP verification uses hardcoded OTP 123456 for phone 9876543210"]
+  }
+}

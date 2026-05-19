@@ -1,0 +1,158 @@
+{
+  "summary": {
+    "tests_run": 21,
+    "tests_passed": 20,
+    "success_rate": 95.23809523809523,
+    "test_phone": "98765432140",
+    "backend_url": "https://kaizer-newsbot.preview.emergentagent.com"
+  },
+  "detailed_results": [
+    {
+      "test_name": "Send OTP",
+      "endpoint": "/auth/send-otp",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-02-26T21:40:15.703626"
+    },
+    {
+      "test_name": "Verify OTP",
+      "endpoint": "/auth/verify-otp",
+      "success": false,
+      "details": "Status: 400, Expected: 200, Error: Invalid OTP",
+      "timestamp": "2026-02-26T21:40:15.838198"
+    },
+    {
+      "test_name": "Upload Image",
+      "endpoint": "/upload/image",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-02-26T21:40:15.964579"
+    },
+    {
+      "test_name": "Upload Invalid Image Type",
+      "endpoint": "/upload/image",
+      "success": true,
+      "details": "Status: 400",
+      "timestamp": "2026-02-26T21:40:16.145378"
+    },
+    {
+      "test_name": "Get News Categories",
+      "endpoint": "/news/categories",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-02-26T21:40:16.258852"
+    },
+    {
+      "test_name": "Get News Feed",
+      "endpoint": "/news/feed?limit=5",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-02-26T21:40:16.411152"
+    },
+    {
+      "test_name": "Create News Article",
+      "endpoint": "/news/admin/push",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-02-26T21:40:16.538839"
+    },
+    {
+      "test_name": "Get Single Article",
+      "endpoint": "/news/article/8919b6c7-2a79-48f5-9bca-6882a8397619",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-02-26T21:40:16.699357"
+    },
+    {
+      "test_name": "Update News Article",
+      "endpoint": "/news/admin/8919b6c7-2a79-48f5-9bca-6882a8397619",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-02-26T21:40:16.832169"
+    },
+    {
+      "test_name": "Toggle Pin Article",
+      "endpoint": "/news/admin/8919b6c7-2a79-48f5-9bca-6882a8397619/pin",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-02-26T21:40:16.958126"
+    },
+    {
+      "test_name": "Get Admin News List",
+      "endpoint": "/news/admin/all?limit=5",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-02-26T21:40:17.131954"
+    },
+    {
+      "test_name": "Register Reporter",
+      "endpoint": "/reporter/register",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-02-26T21:40:17.310539"
+    },
+    {
+      "test_name": "Check Reporter Status",
+      "endpoint": "/reporter/check/98765432140",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-02-26T21:40:17.461282"
+    },
+    {
+      "test_name": "Get Reporter Details",
+      "endpoint": "/reporter/a12d63a0-f0ba-4282-9968-1cae825987f8",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-02-26T21:40:17.638535"
+    },
+    {
+      "test_name": "Approve Reporter (Admin)",
+      "endpoint": "/admin/reporters/a12d63a0-f0ba-4282-9968-1cae825987f8/approve",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-02-26T21:40:17.762169"
+    },
+    {
+      "test_name": "Submit Reporter News",
+      "endpoint": "/reporter/a12d63a0-f0ba-4282-9968-1cae825987f8/submit-news",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-02-26T21:40:17.883530"
+    },
+    {
+      "test_name": "Get Reporter News List",
+      "endpoint": "/reporter/a12d63a0-f0ba-4282-9968-1cae825987f8/news",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-02-26T21:40:18.033772"
+    },
+    {
+      "test_name": "Get All Reporters (Admin)",
+      "endpoint": "/admin/reporters?limit=5",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-02-26T21:40:18.186662"
+    },
+    {
+      "test_name": "API Root Endpoint",
+      "endpoint": "/",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-02-26T21:40:18.303083"
+    },
+    {
+      "test_name": "Create Status Check",
+      "endpoint": "/status",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-02-26T21:40:18.417323"
+    },
+    {
+      "test_name": "Get Status Checks",
+      "endpoint": "/status",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-02-26T21:40:18.681384"
+    }
+  ]
+}
