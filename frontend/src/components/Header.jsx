@@ -1,7 +1,7 @@
 import { useContext } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { AppContext } from "../App";
-import { Moon, Sun, Settings, ArrowLeft, LogOut, User } from "lucide-react";
+import { Moon, Sun, Settings, ArrowLeft, LogOut, User, Menu } from "lucide-react";
 
 export const Header = () => {
   const { darkMode, toggleDarkMode, isAdmin, isLoggedIn, handleLogout } = useContext(AppContext);
@@ -20,9 +20,9 @@ export const Header = () => {
       data-testid="header"
     >
       <div className="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
-        {/* Left: Back + Logo */}
-        <div className="flex items-center gap-3">
-          {!isHomePage && (
+        {/* Left: hamburger (decorative) or back button */}
+        <div className="flex items-center gap-2 w-[80px]">
+          {!isHomePage ? (
             <button
               data-testid="back-btn"
               onClick={() => window.history.length > 1 ? navigate(-1) : navigate("/")}
@@ -32,20 +32,35 @@ export const Header = () => {
             >
               <ArrowLeft size={20} />
             </button>
+          ) : (
+            <button
+              aria-label="Menu"
+              className={`p-2 -ml-1 rounded-lg transition-colors ${
+                darkMode ? "text-slate-400 hover:bg-slate-800" : "text-slate-500 hover:bg-slate-100"
+              }`}
+            >
+              <Menu size={20} />
+            </button>
           )}
-          <div
-            className="flex items-center cursor-pointer select-none"
-            data-testid="logo"
-            onClick={() => navigate("/")}
+        </div>
+
+        {/* Center: Logo */}
+        <div
+          className="flex items-center cursor-pointer select-none"
+          data-testid="logo"
+          onClick={() => navigate("/")}
+        >
+          <span
+            className={`font-serif-display text-[20px] md:text-[22px] tracking-tight leading-none font-bold ${
+              darkMode ? "text-white" : "text-slate-900"
+            }`}
           >
-            <span className={`font-serif-display text-[20px] md:text-[24px] tracking-tight leading-none ${darkMode ? "text-[#E2E8F0]" : "text-[#0F172A]"}`}>
-              The Venture Republic
-            </span>
-          </div>
+            The Venture Republic
+          </span>
         </div>
 
         {/* Right: Actions */}
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 w-[80px] justify-end">
           {isAdmin && (
             <button
               data-testid="admin-btn"

@@ -25,7 +25,7 @@ export const CategoryChips = ({ activeCategory, onCategoryChange }) => {
 
   return (
     <div
-      className={`sticky top-16 z-40 border-b py-3 ${
+      className={`sticky top-16 z-40 border-b ${
         darkMode
           ? "bg-[#0A0F1C] border-slate-800"
           : "bg-white border-slate-200"
@@ -34,7 +34,7 @@ export const CategoryChips = ({ activeCategory, onCategoryChange }) => {
     >
       <div
         ref={scrollRef}
-        className="flex gap-2 overflow-x-auto hide-scrollbar px-4 chip-scroll-container"
+        className="flex gap-0 overflow-x-auto hide-scrollbar px-4 chip-scroll-container"
       >
         {categoryList.map((cat) => {
           const isActive = activeCategory === cat.key;
@@ -45,13 +45,13 @@ export const CategoryChips = ({ activeCategory, onCategoryChange }) => {
               data-testid={`category-${cat.key}`}
               onClick={() => onCategoryChange(cat.key)}
               className={`
-                flex-shrink-0 px-4 py-1.5 rounded-full text-[11px] font-semibold uppercase tracking-wider
-                transition-all whitespace-nowrap border
+                flex-shrink-0 px-3 py-2 text-[11px] font-bold uppercase tracking-[0.12em]
+                border-b-2 transition-all whitespace-nowrap
                 ${isActive
-                  ? "bg-[#0052CC] text-white border-[#0052CC]"
+                  ? "border-[#0052CC] text-[#0052CC]"
                   : darkMode
-                    ? "border-slate-700 text-slate-400 hover:border-[#0052CC] hover:text-[#0052CC]"
-                    : "border-slate-200 text-slate-600 hover:border-[#0052CC] hover:text-[#0052CC]"
+                    ? "border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-500"
+                    : "border-transparent text-slate-500 hover:text-slate-900 hover:border-slate-300"
                 }
                 ${language === "te" ? "font-telugu normal-case" : ""}
               `}

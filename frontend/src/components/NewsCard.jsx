@@ -2,7 +2,6 @@ import { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppContext } from "../App";
 import { Bookmark, BookmarkCheck, Clock, Share2, Pencil } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
 
 export const NewsCard = ({ article, index = 0, articlesList = [] }) => {
   const { language, darkMode, saveArticle, isArticleSaved, openArticle, isAdmin } = useContext(AppContext);
@@ -16,26 +15,13 @@ export const NewsCard = ({ article, index = 0, articlesList = [] }) => {
     ? article.category_label
     : (article.category_label_te || article.category_label);
 
-  const getTimeAgo = (dateStr) => {
-    try {
-      return formatDistanceToNow(new Date(dateStr), { addSuffix: true });
-    } catch {
-      return "";
-    }
-  };
+  // Read time from summary word count
+  const readTime = Math.max(1, Math.ceil((article.summary || "").split(/\s+/).filter(Boolean).length / 200));
 
-  const getExactTime = (dateStr) => {
+  const getFormattedDate = (dateStr) => {
     try {
       const d = new Date(dateStr);
-      const day = d.getDate();
-      const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-      const mon = months[d.getMonth()];
-      const year = d.getFullYear();
-      let h = d.getHours();
-      const ampm = h >= 12 ? "PM" : "AM";
-      h = h % 12 || 12;
-      const min = d.getMinutes().toString().padStart(2, "0");
-      return `${day} ${mon} ${year}, ${h}:${min} ${ampm}`;
+      return d.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
     } catch {
       return "";
     }
@@ -77,9 +63,11 @@ export const NewsCard = ({ article, index = 0, articlesList = [] }) => {
         news-card rounded-xl overflow-hidden border
         animate-fade-in opacity-0
         stagger-${(index % 5) + 1}
+        transition-shadow duration-200
+        ${hovered ? "shadow-md" : "shadow-sm"}
         ${darkMode
           ? "bg-[#111827] border-slate-800"
-          : "bg-white border-slate-200 shadow-sm"
+          : "bg-white border-slate-200"
         }
       `}
       style={{ animationFillMode: "forwards" }}
@@ -96,6 +84,13 @@ export const NewsCard = ({ article, index = 0, articlesList = [] }) => {
           loading="lazy"
           onError={(e) => { e.target.src = defaultImages["national"]; }}
         />
+
+        {/* Category pill badge — bottom-left of image */}
+        {categoryLabel && (
+          <span className="absolute bottom-2 left-2 bg-[#0052CC] text-white text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded pointer-events-none">
+            {categoryLabel}
+          </span>
+        )}
 
         {/* Breaking Badge */}
         {article.is_pinned && (
@@ -135,45 +130,29 @@ export const NewsCard = ({ article, index = 0, articlesList = [] }) => {
             {isSaved ? <BookmarkCheck size={14} /> : <Bookmark size={14} />}
           </button>
         </div>
-
-        {/* The Venture Republic watermark — bottom-right corner */}
-        <div className="absolute bottom-2 right-2 pointer-events-none select-none">
-          <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-black/40 backdrop-blur-sm">
-            <img src="/tvr-logo.png" alt="The Venture Republic" className="h-4 w-auto" />
-            <span className="text-[9px] font-bold text-white/80 uppercase tracking-wider">The Venture Republic</span>
-          </div>
-        </div>
       </div>
 
       {/* Content */}
       <div className="p-4 cursor-pointer" onClick={() => openArticle(article)}>
-        {/* Category label — grey uppercase text, no badge */}
-        <span className={`text-[10px] font-bold uppercase tracking-widest ${darkMode ? "text-slate-500" : "text-slate-400"} ${language === "te" ? "font-telugu normal-case" : ""}`}>
-          {categoryLabel}
-        </span>
-
         <h3 className={`
-          font-serif-display text-[15px] font-bold line-clamp-2 mt-1 mb-2 leading-snug
+          font-serif-display text-[15px] font-bold line-clamp-2 mt-1 mb-1.5 leading-snug
           ${darkMode ? "text-slate-100" : "text-slate-900"}
           ${language === "te" ? "font-telugu" : ""}
         `}>
           {title}
         </h3>
 
-        <p className={`
-          text-[13px] line-clamp-2 mb-3 leading-relaxed
-          ${darkMode ? "text-slate-400" : "text-slate-500"}
-          ${language === "te" ? "font-telugu" : ""}
-        `}>
-          {summary}
+        {/* Author line */}
+        <p className={`text-[11px] mb-2 ${darkMode ? "text-slate-500" : "text-slate-400"} ${language === "te" ? "font-telugu" : ""}`}>
+          By {article.source || "The Venture Republic"}
         </p>
 
-        {/* Time */}
+        {/* Date + read time */}
         <div className={`flex items-center gap-1.5 text-[11px] ${darkMode ? "text-slate-500" : "text-slate-400"}`}>
           <Clock size={11} />
-          <span>{getExactTime(article.published_at)}</span>
+          <span>{getFormattedDate(article.created_at)}</span>
           <span className="opacity-60">·</span>
-          <span>{getTimeAgo(article.published_at)}</span>
+          <span>{readTime} min read</span>
         </div>
       </div>
     </article>
