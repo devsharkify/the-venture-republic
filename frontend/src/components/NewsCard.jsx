@@ -1,7 +1,7 @@
 import { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppContext } from "../App";
-import { Bookmark, BookmarkCheck, Clock, Share2, Pencil, ExternalLink } from "lucide-react";
+import { Bookmark, BookmarkCheck, Clock, Share2, Pencil } from "lucide-react";
 
 // Source portal URLs for attribution
 const SOURCE_URLS = {
@@ -153,31 +153,12 @@ export const NewsCard = ({ article, index = 0, articlesList = [] }) => {
           {title}
         </h3>
 
-        {/* Source with link + date */}
-        <div className="flex items-center justify-between">
-          <div className={`flex items-center gap-1 text-[11px] ${darkMode ? "text-slate-500" : "text-slate-400"}`}>
-            {sourcePortalUrl ? (
-              <a
-                href={sourcePortalUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={(e) => e.stopPropagation()}
-                className="hover:text-[#0052CC] transition-colors flex items-center gap-0.5"
-              >
-                {article.source || "The Venture Republic"}
-                <ExternalLink size={9} className="opacity-60" />
-              </a>
-            ) : (
-              <span>{article.source || "The Venture Republic"}</span>
-            )}
-          </div>
-
-          <div className={`flex items-center gap-1 text-[11px] ${darkMode ? "text-slate-500" : "text-slate-400"}`}>
-            <Clock size={10} />
-            <span>{getFormattedDate(article)}</span>
-            <span className="opacity-50">·</span>
-            <span>{readTime} min</span>
-          </div>
+        {/* Date + read time (source's original published_at) */}
+        <div className={`flex items-center gap-1.5 text-[11px] ${darkMode ? "text-slate-500" : "text-slate-400"}`}>
+          <Clock size={10} />
+          <span>{getFormattedDate(article)}</span>
+          <span className="opacity-40">·</span>
+          <span>{readTime} min read</span>
         </div>
       </div>
     </article>
