@@ -27,7 +27,7 @@ import AgentsDashboard from "./pages/AgentsDashboard";
 import StartupApply from "./pages/StartupApply";
 import { VisitorCounter } from "./components/VisitorCounter";
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || "https://the-venture-republic-production.up.railway.app";
 export const API = `${BACKEND_URL}/api`;
 
 // Attach admin phone header automatically on every request made by the logged-in admin.
