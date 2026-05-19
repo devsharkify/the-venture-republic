@@ -48,6 +48,11 @@ const webpackConfig = {
     },
     configure: (webpackConfig) => {
 
+      // Remove ForkTsCheckerWebpackPlugin — incompatible with Node.js 24's ajv resolution
+      webpackConfig.plugins = webpackConfig.plugins.filter(
+        (plugin) => plugin && plugin.constructor && plugin.constructor.name !== 'ForkTsCheckerWebpackPlugin'
+      );
+
       // Add ignored patterns to reduce watched directories
         webpackConfig.watchOptions = {
           ...webpackConfig.watchOptions,
