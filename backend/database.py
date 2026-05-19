@@ -25,16 +25,14 @@ IMAGEKIT_PUBLIC_KEY = os.environ.get('IMAGEKIT_PUBLIC_KEY', '')
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-# Categories
+# Categories \u2014 Startup & Funding focused
 CATEGORIES = {
-    "local": {"en": "Local - Dammaiguda", "te": "\u0C38\u0C4D\u0C25\u0C3E\u0C28\u0C3F\u0C15 - \u0C26\u0C2E\u0C4D\u0C2E\u0C3E\u0C2F\u0C3F\u0C17\u0C42\u0C21"},
-    "city": {"en": "City - Hyderabad", "te": "\u0C28\u0C17\u0C30\u0C02 - \u0C39\u0C48\u0C26\u0C30\u0C3E\u0C2C\u0C3E\u0C26\u0C4D"},
-    "state": {"en": "State - Telangana", "te": "\u0C30\u0C3E\u0C37\u0C4D\u0C1F\u0C4D\u0C30\u0C02 - \u0C24\u0C46\u0C32\u0C02\u0C17\u0C3E\u0C23"},
-    "national": {"en": "National - India", "te": "\u0C1C\u0C3E\u0C24\u0C40\u0C2F - \u0C2D\u0C3E\u0C30\u0C24\u0C26\u0C47\u0C36\u0C02"},
-    "international": {"en": "International", "te": "\u0C05\u0C02\u0C24\u0C30\u0C4D\u0C1C\u0C3E\u0C24\u0C40\u0C2F"},
-    "sports": {"en": "Sports", "te": "\u0C15\u0C4D\u0C30\u0C40\u0C21\u0C32\u0C41"},
-    "entertainment": {"en": "Entertainment", "te": "\u0C35\u0C3F\u0C28\u0C4B\u0C26\u0C02"},
-    "tech": {"en": "Technology", "te": "\u0C1F\u0C46\u0C15\u0C4D\u0C28\u0C3E\u0C32\u0C1C\u0C40"},
-    "health": {"en": "Health", "te": "\u0C06\u0C30\u0C4B\u0C17\u0C4D\u0C2F\u0C02"},
+    "funding": {"en": "Funding", "te": "\u0C2B\u0C02\u0C21\u0C3F\u0C02\u0C17\u0C4D"},
+    "startup": {"en": "Startups", "te": "\u0C38\u0C4D\u0C1F\u0C3E\u0C30\u0C4D\u0C1F\u0C2A\u0C4D\u0C38\u0C4D"},
+    "vc": {"en": "Venture Capital", "te": "\u0C35\u0C46\u0C02\u0C1A\u0C30\u0C4D \u0C15\u0C4D\u0C2F\u0C3E\u0C2A\u0C3F\u0C1F\u0C32\u0C4D"},
+    "ipo": {"en": "IPO & Markets", "te": "\u0C10\u0C2A\u0C40\u0C13 & \u0C2E\u0C3E\u0C30\u0C4D\u0C15\u0C46\u0C1F\u0C4D\u0C38\u0C4D"},
+    "tech": {"en": "Tech", "te": "\u0C1F\u0C46\u0C15\u0C4D"},
+    "fintech": {"en": "Fintech", "te": "\u0C2B\u0C3F\u0C28\u0C4D\u200C\u0C1F\u0C46\u0C15\u0C4D"},
+    "policy": {"en": "Policy", "te": "\u0C2A\u0C3E\u0C32\u0C38\u0C40"},
     "business": {"en": "Business", "te": "\u0C35\u0C4D\u0C2F\u0C3E\u0C2A\u0C3E\u0C30\u0C02"},
 }
