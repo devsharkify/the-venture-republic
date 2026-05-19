@@ -1,14 +1,14 @@
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Noto+Sans+Telugu:wght@400;500;600;700&family=Playfair+Display:wght@400;700;900&family=Noto+Serif+Telugu:wght@400;700&family=Merriweather:wght@300;400;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Noto+Sans+Telugu:wght@400;500;600;700&family=DM+Serif+Display:ital@0;1&family=Playfair+Display:wght@400;700;900&family=Noto+Serif+Telugu:wght@400;700&family=Merriweather:wght@300;400;700;900&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --primary-orange: #EA5B2D;
-  --primary-navy: #2E3A59;
+  --primary-blue: #0052CC;
+  --primary-navy: #0A0F1C;
   --urgent-red: #DC2626;
-  --bg-light: #FFF9F5;
+  --bg-light: #F8F9FA;
   --bg-paper: #FFFFFF;
   --text-primary: #0F172A;
   --text-secondary: #475569;
@@ -28,6 +28,7 @@ body {
   background-color: var(--bg-light);
   color: var(--text-primary);
 }
+
 
 .font-telugu {
   font-family: 'Noto Sans Telugu', sans-serif;
@@ -65,25 +66,25 @@ body {
 
 @layer base {
   :root {
-    --background: 30 100% 99%;
+    --background: 210 17% 98%;
     --foreground: 222.2 84% 4.9%;
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
-    --primary: 16 82% 55%;
+    --primary: 214 100% 40%;
     --primary-foreground: 0 0% 100%;
     --secondary: 220 26% 26%;
     --secondary-foreground: 0 0% 100%;
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 16 82% 55%;
+    --accent: 214 100% 40%;
     --accent-foreground: 0 0% 100%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 16 82% 55%;
+    --ring: 214 100% 40%;
     --radius: 0.5rem;
   }
 }
@@ -109,8 +110,8 @@ body {
 }
 
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(234, 91, 45, 0.4); }
-  50% { box-shadow: 0 0 0 8px rgba(234, 91, 45, 0); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(0, 82, 204, 0.3); }
+  50% { box-shadow: 0 0 0 8px rgba(0, 82, 204, 0); }
 }
 
 .animate-fade-in {
@@ -147,26 +148,26 @@ body {
   overflow: hidden;
 }
 
-/* Category chip colors */
-.chip-local { @apply bg-amber-100 text-amber-800; }
-.chip-city { @apply bg-blue-100 text-blue-800; }
-.chip-state { @apply bg-purple-100 text-purple-800; }
-.chip-national { @apply bg-green-100 text-green-800; }
-.chip-international { @apply bg-pink-100 text-pink-800; }
-.chip-sports { @apply bg-emerald-100 text-emerald-800; }
-.chip-entertainment { @apply bg-violet-100 text-violet-800; }
-.chip-tech { @apply bg-indigo-100 text-indigo-800; }
-.chip-health { @apply bg-teal-100 text-teal-800; }
-.chip-business { @apply bg-slate-100 text-slate-800; }
+/* Category chip colors — all uniform, no rainbow */
+.chip-local,
+.chip-city,
+.chip-state,
+.chip-national,
+.chip-international,
+.chip-sports,
+.chip-entertainment,
+.chip-tech,
+.chip-health,
+.chip-business { @apply bg-slate-100 text-slate-600; }
 
-/* Orange theme button */
+/* Blue theme button */
 .btn-primary {
-  @apply bg-orange-500 text-white px-4 py-2 rounded-lg font-medium;
+  @apply bg-[#0052CC] text-white px-4 py-2 rounded-lg font-medium;
   transition: background-color 0.2s, transform 0.1s;
 }
 
 .btn-primary:hover {
-  @apply bg-orange-600;
+  @apply bg-[#003E9E];
   transform: translateY(-1px);
 }
 
@@ -174,19 +175,19 @@ body {
   transform: translateY(0);
 }
 
-/* Card hover effect */
+/* Forbes card hover effect */
 .news-card {
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .news-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
 }
 
 /* Breaking news badge */
 .breaking-badge {
-  @apply bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded;
+  @apply bg-red-600 text-white text-xs font-bold px-2 py-1 rounded;
   animation: pulse-glow 2s infinite;
 }
 

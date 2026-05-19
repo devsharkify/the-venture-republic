@@ -11,15 +11,22 @@ export const Header = () => {
   const isHomePage = location.pathname === "/";
 
   return (
-    <header 
-      className={`sticky top-0 z-50 glass-header border-b ${
-        darkMode 
-          ? "bg-slate-900/85 border-slate-800/60" 
-          : "bg-white/85 border-slate-200/60"
+    <header
+      className={`sticky top-0 z-50 border-b ${
+        darkMode
+          ? "bg-[#0A0F1C] border-slate-800"
+          : "bg-white border-slate-200"
       }`}
       data-testid="header"
     >
-      <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+      {/* Ticker bar — dark navy */}
+      <div className="bg-[#0A0F1C] text-white text-[10px] font-semibold uppercase tracking-widest px-4 py-1 text-center select-none">
+        <span className="opacity-60">The Venture Republic</span>
+        <span className="mx-2 opacity-30">·</span>
+        <span className="opacity-60">{language === "en" ? "India's Premium Startup & Funding Magazine" : "భారత్ యొక్క ప్రీమియం స్టార్టప్ మ్యాగజైన్"}</span>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
         {/* Left: Back + Logo */}
         <div className="flex items-center gap-3">
           {!isHomePage && (
@@ -48,15 +55,15 @@ export const Header = () => {
         </div>
 
         {/* Right: Actions */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
           {isAdmin && (
             <button
               data-testid="admin-btn"
               onClick={() => navigate("/admin")}
               className={`p-2.5 rounded-lg transition-all ${
-                darkMode 
-                  ? "text-slate-400 hover:text-orange-400 hover:bg-slate-800" 
-                  : "text-slate-500 hover:text-orange-600 hover:bg-orange-50"
+                darkMode
+                  ? "text-slate-400 hover:text-[#0052CC] hover:bg-slate-800"
+                  : "text-slate-500 hover:text-[#0052CC] hover:bg-slate-100"
               }`}
             >
               <Settings size={18} />
@@ -68,8 +75,8 @@ export const Header = () => {
               data-testid="logout-btn"
               onClick={handleLogout}
               className={`p-2.5 rounded-lg transition-all ${
-                darkMode 
-                  ? "text-slate-400 hover:text-red-400 hover:bg-slate-800" 
+                darkMode
+                  ? "text-slate-400 hover:text-red-400 hover:bg-slate-800"
                   : "text-slate-500 hover:text-red-500 hover:bg-red-50"
               }`}
             >
@@ -81,8 +88,8 @@ export const Header = () => {
             data-testid="dark-mode-toggle"
             onClick={toggleDarkMode}
             className={`p-2.5 rounded-lg transition-all ${
-              darkMode 
-                ? "text-amber-400 hover:bg-slate-800" 
+              darkMode
+                ? "text-amber-400 hover:bg-slate-800"
                 : "text-slate-500 hover:bg-slate-100"
             }`}
           >
@@ -93,14 +100,14 @@ export const Header = () => {
             data-testid="language-toggle"
             onClick={toggleLanguage}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border transition-all font-medium ${
-              darkMode 
-                ? "border-slate-700 hover:border-orange-500/50 hover:bg-slate-800 text-slate-300" 
-                : "border-slate-200 hover:border-orange-300 hover:bg-orange-50 text-slate-700"
+              darkMode
+                ? "border-slate-700 hover:border-[#0052CC] hover:bg-slate-800 text-slate-300"
+                : "border-slate-200 hover:border-[#0052CC] hover:text-[#0052CC] text-slate-700"
             }`}
           >
-            <Globe size={14} className="text-orange-500" />
+            <Globe size={14} className={darkMode ? "text-slate-400" : "text-slate-500"} />
             <span className={`text-xs font-semibold ${language === "te" ? "font-telugu" : ""}`}>
-              {language === "en" ? "\u0C24\u0C46" : "EN"}
+              {language === "en" ? "తె" : "EN"}
             </span>
           </button>
 
@@ -109,10 +116,10 @@ export const Header = () => {
             onClick={() => navigate("/profile")}
             className={`p-2.5 rounded-lg transition-all ${
               location.pathname === "/profile"
-                ? "text-orange-500 bg-orange-50 dark:bg-orange-500/10"
-                : darkMode 
-                  ? "text-slate-400 hover:text-orange-400 hover:bg-slate-800" 
-                  : "text-slate-500 hover:text-orange-600 hover:bg-orange-50"
+                ? "text-[#0052CC] bg-blue-50 dark:bg-blue-500/10"
+                : darkMode
+                  ? "text-slate-400 hover:text-[#0052CC] hover:bg-slate-800"
+                  : "text-slate-500 hover:text-[#0052CC] hover:bg-slate-100"
             }`}
           >
             <User size={18} />
