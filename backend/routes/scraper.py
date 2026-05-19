@@ -21,7 +21,7 @@ HEADERS = {
     "Accept-Language": "en-IN,en;q=0.9",
 }
 
-GEMINI_KEY = os.environ.get("GEMINI_API_KEY", "AIzaSyCj2ooZ3D9FgpXe-TnjFXZN7aaKWDJpOQ0")
+GEMINI_KEY = os.environ.get("GEMINI_API_KEY", "")
 GEMINI_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={GEMINI_KEY}"
 
 # ── Startup relevance filters ──────────────────────────────────────────────────
