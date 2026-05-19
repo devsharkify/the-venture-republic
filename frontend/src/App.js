@@ -252,21 +252,6 @@ function AppContent() {
             <Route path="/startup-apply" element={<StartupApply />} />
           </Routes>
         </main>
-        {!isAdminPage && !isSwipeMode && !isReporterPage && !isLoginPage && <BottomNav />}
-        {showFloatingLive && (
-          <button
-            data-testid="floating-live-btn"
-            onClick={() => navigate("/live")}
-            className="fixed bottom-20 right-4 z-50 flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white pl-3 pr-4 py-2.5 rounded-full shadow-lg shadow-red-600/30 transition-all hover:scale-105 active:scale-95"
-          >
-            <span className="relative flex h-3 w-3">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75" />
-              <span className="relative inline-flex rounded-full h-3 w-3 bg-white" />
-            </span>
-            <span className="text-sm font-bold tracking-wide">LIVE TV</span>
-          </button>
-        )}
-        {showFloatingLive && <VisitorCounter />}
         {!isSwipeMode && <ArticleModal />}
         <Toaster position="top-center" richColors theme={darkMode ? "dark" : "light"} />
       </div>
