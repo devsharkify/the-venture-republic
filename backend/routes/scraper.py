@@ -1,343 +1,460 @@
+"""
+TVR Backend Scraper — Startup/Funding focused RSS + Entrackr sitemap
+Replaces Siasat/DC/TOI/Eenadu with quality Indian startup news sources.
+Integrates Gemini 2.5 Flash for title & summary rephrase.
+"""
 from fastapi import APIRouter
 from datetime import datetime, timezone, timedelta
-import asyncio
-import uuid
+import asyncio, uuid, os, re
+import feedparser
 import httpx
 from bs4 import BeautifulSoup
-from database import db, logger, EMERGENT_LLM_KEY, CATEGORIES
-from helpers import classify_article_category, guess_category_from_url, extract_seo_and_text, generate_ai_summary, translate_to_telugu, translate_to_english, ensure_min_paragraphs, expand_summary_with_ai
+from database import db, logger, CATEGORIES
 
 router = APIRouter(prefix="/api")
 
 scraper_status = {"running": False, "last_run": None, "articles_added": 0, "error": None}
 
-HEADERS = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'}
+HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/124 Safari/537.36",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Accept-Language": "en-IN,en;q=0.9",
+}
 
-DC_CATEGORY_MAP = {"southern-states": "state", "telangana": "state", "andhra-pradesh": "state", "karnataka": "state", "nation": "national", "world": "international", "americas": "international", "asia": "international", "sports": "sports", "business": "business", "entertainment": "entertainment", "technology": "tech", "health": "health", "market": "business", "economics": "business"}
-EENADU_CATEGORY_MAP = {"sports": "sports", "movies": "entertainment", "business": "business", "india": "national", "world": "international", "crime": "city", "women": "entertainment", "telangana": "state", "andhra-pradesh": "state", "health": "health", "technology": "tech", "education": "national"}
-TOI_CATEGORY_MAP = {"india": "national", "world": "international", "business": "business", "sports": "sports", "entertainment": "entertainment", "technology": "tech", "life-style": "entertainment", "education": "national", "city": "city", "defence": "national"}
-SIASAT_CATEGORY_MAP = {"hyderabad": "city", "telangana": "state", "andhra-pradesh": "state", "india": "national", "national": "national", "middle-east": "international", "world": "international", "international": "international", "technology": "tech", "technology-2": "tech", "entertainment": "entertainment", "sports": "sports", "business": "business", "health": "health"}
+GEMINI_KEY = os.environ.get("GEMINI_API_KEY", "AIzaSyCj2ooZ3D9FgpXe-TnjFXZN7aaKWDJpOQ0")
+GEMINI_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={GEMINI_KEY}"
+
+# ── Startup relevance filters ──────────────────────────────────────────────────
+
+SKIP_TERMS = [
+    "cricket", "ipl", "football", "sports", "bollywood", "film ", " movie",
+    "actor", "actress", "entertainment", "crime", "murder", "election",
+    "bjp", "congress", "parliament", "weather", "army", "military",
+    "flood", "earthquake", "accident", "temple", "mosque",
+    "pakistan", "russia", "ukraine",
+    "petrol price", "diesel price", "crude oil price",
+    "coal mine", "nuclear plant", "railway project",
+    "highway project", "road project", "fertilizer plant",
+    "power plant", "solar park", "wind farm",
+    "residential project", "luxury project", "township project",
+    "police arrest", "fir filed", "court order",
+]
+
+INDIA_SIGNALS = [
+    "india", "indian", "bengaluru", "bangalore", "mumbai", "delhi",
+    "hyderabad", "pune", "chennai", "kolkata", "inr", "crore", "lakh",
+    "sebi", "rbi", "dpiit", "rupee", "₹",
+    "flipkart", "zomato", "swiggy", "paytm", "razorpay", "groww",
+    "zerodha", "nykaa", "meesho", "cred", "freshworks", "ola", "byju",
+]
+
+STARTUP_STRONG = [
+    "startup", "series a", "series b", "series c", "series d", "series e",
+    "seed round", "pre-seed", "angel round", "angel investment",
+    "raises funding", "raised funding", "secures funding", "closes funding",
+    "funding round", "venture capital", "vc fund",
+    "unicorn", "soonicorn", "ipo filing", "ipo-bound", "co-founder", "founder",
+    "fintech", "edtech", "healthtech", "agritech", "insurtech", "saas",
+    "d2c brand", "bootstrapped", "incubator", "accelerator",
+    "razorpay", "paytm", "phonepe", "groww", "zerodha", "cred",
+    "zomato", "swiggy", "flipkart", "meesho", "nykaa", "ola", "byju",
+    "moglix", "lenskart", "vedantu", "upgrad", "cars24", "oyo",
+    "mamaearth", "nazara", "dream11", "mpl",
+    "fund of funds", "startup india", "dpiit",
+    "raises $", "raises rs", "raises ₹",
+    "secures $", "secures rs", "secures ₹",
+    "raised $", "raised rs", "raised ₹",
+    "bags $", "bags rs", "bags ₹",
+    "crore seed", "crore funding", "crore investment",
+    "million funding", "million investment", "million raise",
+    "pre-series", "series funding",
+    "blackbuck", "oxyzo", "mapmyindia", "trackk", "damroo",
+    "delhivery", "makemytrip", "bain capital", "lightspeed",
+    "shadowfax", "rapido", "scripbox", "meesho",
+]
 
 
-def cat_from_url(url, cat_map):
-    url_lower = url.lower()
-    for key, cat in cat_map.items():
-        if f"/{key}/" in url_lower or f"/{key}" in url_lower:
+def is_startup_relevant(title: str, text: str = "", trusted: bool = False) -> bool:
+    combined = (title + " " + text[:2000]).lower()
+    if any(k in combined for k in SKIP_TERMS):
+        return False
+    if not trusted and not any(k in combined for k in INDIA_SIGNALS):
+        return False
+    if any(k in combined for k in STARTUP_STRONG):
+        return True
+    if trusted:
+        return any(k in combined for k in [
+            "funding", "startup", "raise", "investor", "venture",
+            "crore", "million", "ipo", "acquire", "fintech", "saas",
+        ])
+    medium = sum(1 for k in ["investment", "investor", "backed", "funded", "capital", "crore", "million", "venture", "equity"] if k in combined)
+    return medium >= 2
+
+
+CATEGORY_RULES = [
+    ("ipo",     ["ipo", "initial public offering", "stock listing", "nse listing", "bse listing", "sme ipo", "mainboard ipo", "market debut"]),
+    ("funding", ["funding round", "series a", "series b", "series c", "series d", "series e", "seed round", "pre-seed", "angel round", "raises ", "raised ", "capital raise", "equity funding", "backed by", "led by", "investment round", "fundraise", "secures funding", "closes funding", "secures $", "secures rs", "raises $", "raises rs", "secures ₹", "raises ₹", "bags $", "bags rs", "bags ₹"]),
+    ("fintech", ["fintech", "payment", "neobank", "crypto", "blockchain", "insurtech", "lending", "nbfc", "upi", "digital wallet", "razorpay", "paytm", "phonepe", "zerodha", "groww", "cred", "policybazaar", "wealthtech", "bnpl"]),
+    ("vc",      ["venture capital", "vc fund", "private equity", "pe fund", "limited partner", "vc firm", "sequoia", "accel", "lightspeed", "matrix partners", "blume ventures", "kalaari", "nexus", "elevation capital", "peak xv", "general catalyst", "tiger global", "softbank", "fund of funds"]),
+    ("policy",  ["sebi", "rbi circular", "regulation", "regulatory", "dpiit", "startup india", "fdi", "ministry", "government scheme", "budget", "gst", "angel tax"]),
+    ("tech",    ["saas", "artificial intelligence", "machine learning", "deep tech", "agritech", "edtech", "healthtech", "proptech", "cloud", "automation", "b2b", "ai startup", "tech startup", "d2c", "generative ai"]),
+    ("startup", ["startup", "co-founder", "bootstrapped", "entrepreneur", "d2c", "founded", "incubator", "accelerator", "cohort", "pitch", "early-stage"]),
+    ("business", ["merger", "acquisition", "partnership", "valuation", "unicorn", "profit", "quarterly", "revenue", "market share", "expansion", "ipo-bound"]),
+]
+
+
+def detect_category(title: str, text: str) -> str:
+    c = (title + " " + text[:2000]).lower()
+    for cat, kws in CATEGORY_RULES:
+        if any(k in c for k in kws):
             return cat
-    return ""
+    return "business"
 
 
-async def save_article(article, source):
-    existing = await db.news.find_one({"link": article["link"]}, {"_id": 0, "id": 1})
+# ── Gemini rephrase ────────────────────────────────────────────────────────────
+
+TITLE_PROMPT = """You are an editor at The Venture Republic, a premium Indian startup magazine.
+Rephrase this headline to be engaging and punchy. Keep all facts exact (company names, numbers, amounts).
+Max 100 characters. No quotes. Write like Forbes/Bloomberg. Return ONLY the headline.
+
+Original: {title}"""
+
+SUMMARY_PROMPT = """You are a journalist at The Venture Republic, India's top startup magazine.
+Rewrite this article summary to be engaging and original. Keep all facts accurate.
+Write 3-4 paragraphs (~180 words). Start with the key fact. No filler phrases. Plain text only.
+
+Original: {summary}
+
+Return ONLY the rewritten summary."""
+
+
+async def gemini_rephrase(client: httpx.AsyncClient, title: str, summary: str) -> tuple[str, str]:
+    """Returns (rephrased_title, rephrased_summary). Falls back to originals on failure."""
+    new_title, new_summary = title, summary
+
+    def make_body(prompt, max_tokens=150):
+        return {
+            "contents": [{"parts": [{"text": prompt}]}],
+            "generationConfig": {
+                "temperature": 0.7,
+                "maxOutputTokens": max_tokens,
+                "thinkingConfig": {"thinkingBudget": 0},
+            }
+        }
+
+    try:
+        r = await client.post(GEMINI_URL, json=make_body(TITLE_PROMPT.format(title=title)), timeout=25)
+        if r.status_code == 200:
+            d = r.json()
+            t = d["candidates"][0]["content"]["parts"][0]["text"].strip()
+            if t and len(t) < 200:
+                new_title = t
+    except Exception as e:
+        logger.warning(f"Gemini title rephrase failed: {e}")
+
+    if summary and len(summary) > 80:
+        try:
+            r2 = await client.post(GEMINI_URL, json=make_body(SUMMARY_PROMPT.format(summary=summary[:1500]), max_tokens=600), timeout=30)
+            if r2.status_code == 200:
+                d2 = r2.json()
+                s = d2["candidates"][0]["content"]["parts"][0]["text"].strip()
+                if s and len(s) > 50:
+                    new_summary = s
+        except Exception as e:
+            logger.warning(f"Gemini summary rephrase failed: {e}")
+
+    return new_title, new_summary
+
+
+# ── Article page extractor ─────────────────────────────────────────────────────
+
+async def extract_article_page(client: httpx.AsyncClient, url: str) -> dict:
+    """Fetch article page and extract image, text, published_at."""
+    result = {"image": "", "text": "", "published_at": None}
+    try:
+        r = await client.get(url, headers=HEADERS, timeout=20, follow_redirects=True)
+        if r.status_code != 200:
+            return result
+        soup = BeautifulSoup(r.text, "html.parser")
+
+        # Image
+        for m in soup.find_all("meta"):
+            prop = m.get("property", "") or m.get("name", "")
+            if "og:image" in prop or "twitter:image" in prop:
+                c = m.get("content", "").strip()
+                if c.startswith("http"):
+                    result["image"] = c
+                    break
+
+        # Text
+        text = ""
+        for cls in ["entry-content", "artText", "article-body", "Normal", "story-content",
+                    "article-content", "post-content", "storyContent", "article__content"]:
+            tag = soup.find(attrs={"class": cls})
+            if tag:
+                t = " ".join(p.get_text(strip=True) for p in tag.find_all("p") if len(p.get_text(strip=True)) > 40)
+                if len(t) > 200:
+                    text = t
+                    break
+        if not text:
+            art = soup.find("article")
+            if art:
+                text = " ".join(p.get_text(strip=True) for p in art.find_all("p") if len(p.get_text(strip=True)) > 40)
+        if not text:
+            text = " ".join(p.get_text(strip=True) for p in soup.find_all("p") if len(p.get_text(strip=True)) > 50)
+        result["text"] = text[:3000]
+
+        # Published date
+        pub_tag = (soup.find("meta", property="article:published_time")
+                   or soup.find("meta", attrs={"name": "date"})
+                   or soup.find("meta", attrs={"name": "pubdate"}))
+        if pub_tag and pub_tag.get("content"):
+            try:
+                from dateutil import parser as dp
+                result["published_at"] = dp.parse(pub_tag["content"]).replace(tzinfo=timezone.utc).isoformat()
+            except Exception:
+                pass
+    except Exception as e:
+        logger.debug(f"extract_article_page error for {url}: {e}")
+    return result
+
+
+# ── Core save function ─────────────────────────────────────────────────────────
+
+async def save_startup_article(
+    client: httpx.AsyncClient,
+    title: str,
+    url: str,
+    image: str,
+    text: str,
+    published_at: str,
+    source: str,
+    trusted: bool = False,
+) -> bool:
+    """Validate, rephrase, and save a startup article. Returns True if saved."""
+    # Dedup check
+    existing = await db.news.find_one(
+        {"$or": [{"link": url}, {"source_url": url}]},
+        {"_id": 0, "id": 1}
+    )
     if existing:
         return False
-    seo, full_text = {}, ""
-    try:
-        seo, full_text = await extract_seo_and_text(article["link"], HEADERS)
-    except Exception:
-        pass
-    if not article.get("image") and seo.get("og_image"):
-        article["image"] = seo["og_image"]
-    elif seo.get("og_image"):
-        # Always prefer og_image from the article page — scraper homepage images are unreliable
-        article["image"] = seo["og_image"]
-    summary = await generate_ai_summary(full_text, article["link"])
-    if summary:
-        article["summary"] = summary
-    elif not article.get("summary") or article["summary"] == article.get("title"):
-        article["summary"] = seo.get("og_description") or seo.get("seo_description") or (full_text[:500] if full_text else article.get("title", ""))
-    # Enforce 4+ paragraph minimum: format what we have, expand via AI if still too thin
-    article["summary"] = ensure_min_paragraphs(article.get("summary", ""), min_paragraphs=4)
-    para_count = len([p for p in (article["summary"] or "").split("\n\n") if p.strip()])
-    if para_count < 4 and (full_text or article.get("summary")):
-        expanded = await expand_summary_with_ai(article["summary"], full_text or "", min_paragraphs=4)
-        if expanded:
-            article["summary"] = ensure_min_paragraphs(expanded, min_paragraphs=4)
-    cat = article.get("category") or ""
-    if not cat:
-        cat = await classify_article_category(article.get("title", ""), article.get("summary", ""))
-    is_telugu = article.get("_telugu", False)
-    news = {
+
+    if not title or not url:
+        return False
+    if not image:
+        return False
+    if not is_startup_relevant(title, text, trusted=trusted):
+        return False
+
+    cat = detect_category(title, text)
+    if cat not in CATEGORIES:
+        cat = "business"
+
+    # Gemini rephrase
+    new_title, new_summary = await gemini_rephrase(client, title, text or title)
+
+    doc = {
         "id": str(uuid.uuid4()),
-        "title": "" if is_telugu else article.get("title", "")[:200],
-        "title_te": article.get("title", "")[:200] if is_telugu else "",
-        "summary": "" if is_telugu else article.get("summary", ""),
-        "summary_te": article.get("summary", "") if is_telugu else "",
+        "title": new_title[:200],
+        "title_orig": title[:200],
+        "summary": new_summary,
+        "summary_orig": text or title,
+        "title_te": "",
+        "summary_te": "",
         "category": cat,
         "category_label": CATEGORIES.get(cat, {}).get("en", cat),
         "category_label_te": CATEGORIES.get(cat, {}).get("te", cat),
-        "image": article.get("image", ""),
+        "image": image,
         "video_url": "", "content_type": "text",
-        "link": article["link"], "is_pinned": False, "priority": 5, "is_active": True,
+        "link": url,
+        "source_url": url,
+        "is_pinned": False, "priority": 5, "is_active": True,
         "source": source,
-        "seo_description": seo.get("seo_description", ""), "seo_keywords": seo.get("seo_keywords", []),
-        "seo_author": seo.get("seo_author", ""), "og_title": seo.get("og_title", ""),
-        "og_description": seo.get("og_description", ""), "og_image": seo.get("og_image", ""),
-        "article_published_time": seo.get("article_published_time", ""),
-        "published_at": seo.get("article_published_time") or datetime.now(timezone.utc).isoformat(),
+        "seo_description": "",
+        "seo_keywords": [],
+        "og_title": new_title[:200],
+        "og_description": new_summary[:300] if new_summary else "",
+        "og_image": image,
+        "article_published_time": published_at,
+        "published_at": published_at or datetime.now(timezone.utc).isoformat(),
         "created_at": datetime.now(timezone.utc).isoformat(),
         "updated_at": datetime.now(timezone.utc).isoformat(),
+        "views": 0,
+        "language": "en",
     }
-    await db.news.insert_one(news)
-    # Auto-translate: English→Telugu or Telugu→English
     try:
-        if is_telugu and not news["title"]:
-            en_title = await translate_to_english(news["title_te"])
-            en_summary = await translate_to_english(news["summary_te"])
-            if en_title:
-                await db.news.update_one({"id": news["id"]}, {"$set": {"title": en_title, "summary": en_summary or ""}})
-        elif not is_telugu and not news["title_te"]:
-            te_title = await translate_to_telugu(news["title"])
-            te_summary = await translate_to_telugu(news["summary"])
-            if te_title:
-                await db.news.update_one({"id": news["id"]}, {"$set": {"title_te": te_title, "summary_te": te_summary or ""}})
+        await db.news.insert_one(doc)
+        logger.info(f"[{cat}] Saved: {new_title[:60]}")
+        return True
     except Exception as e:
-        logger.error(f"Auto-translate failed for {news['id']}: {e}")
-    return news["id"]
+        if "duplicate" not in str(e).lower():
+            logger.error(f"Save error for {url}: {e}")
+        return False
 
 
-# ===== SIASAT.COM SCRAPER =====
-async def scrape_siasat():
+# ── RSS scraper ────────────────────────────────────────────────────────────────
+
+RSS_FEEDS = [
+    {"url": "https://yourstory.com/category/funding/feed", "source": "YourStory", "trusted": True},
+    {"url": "https://yourstory.com/feed",                  "source": "YourStory", "trusted": True},
+    {"url": "https://economictimes.indiatimes.com/small-biz/startups/rssfeeds/5575607.cms", "source": "ET Startups", "trusted": True},
+    {"url": "https://economictimes.indiatimes.com/tech/funding-and-deals/rssfeeds/90005264.cms", "source": "ET Startups", "trusted": True},
+    {"url": "https://economictimes.indiatimes.com/tech/rssfeeds/13357270.cms", "source": "ET Tech", "trusted": True},
+    {"url": "https://www.livemint.com/rss/startups",      "source": "Mint", "trusted": True},
+    {"url": "https://www.livemint.com/rss/technology",    "source": "Mint", "trusted": True},
+    {"url": "https://www.moneycontrol.com/rss/business.xml", "source": "Moneycontrol", "trusted": False},
+    {"url": "https://startuptalky.com/feed/",             "source": "StartupTalky", "trusted": True},
+    {"url": "https://thetechpanda.com/feed/",             "source": "The Tech Panda", "trusted": True},
+    {"url": "https://techcrunch.com/tag/india/feed/",     "source": "TechCrunch", "trusted": False},
+    {"url": "https://www.ndtvprofit.com/business/feed",   "source": "NDTV Profit", "trusted": False},
+]
+
+
+async def scrape_rss_feeds(client: httpx.AsyncClient) -> int:
     added = 0
-    try:
-        async with httpx.AsyncClient(timeout=30.0, follow_redirects=True) as http:
-            resp = await http.get("https://www.siasat.com/", headers=HEADERS)
-            resp.raise_for_status()
-        soup = BeautifulSoup(resp.text, 'html.parser')
-        articles = []
-        for h2 in soup.find_all('h2'):
-            a = h2.find('a')
-            if not a or not a.get('href'):
+    for feed_cfg in RSS_FEEDS:
+        try:
+            r = await client.get(feed_cfg["url"], headers=HEADERS, timeout=15, follow_redirects=True)
+            if r.status_code != 200:
                 continue
-            link = a['href']
-            if not link.startswith('http'):
-                link = f"https://www.siasat.com/{link.lstrip('/')}"
-            title = a.get_text(strip=True)
-            if not title or 'siasat.com' not in link:
-                continue
-            if any(x['link'] == link for x in articles):
-                continue
-            image = ""
-            parent = h2.parent
-            if parent:
-                img = parent.find('img')
-                if img:
-                    image = img.get('data-src') or img.get('data-lazy-src') or img.get('src') or ""
-                    if image:
-                        image = image.replace('-220x150', '-390x220').replace('-80x80', '-390x220')
-            summary = ""
-            if parent:
-                p = parent.find('p')
-                if p:
-                    summary = p.get_text(strip=True)
-            articles.append({"link": link, "title": title[:200], "summary": summary or title, "image": image, "category": cat_from_url(link, SIASAT_CATEGORY_MAP)})
-        for a in articles[:30]:
-            if await save_article(a, "siasat.com"):
-                added += 1
-    except Exception as e:
-        logger.error(f"Siasat scraper error: {e}")
+            feed = feedparser.parse(r.text)
+            for entry in feed.entries[:30]:
+                url = getattr(entry, "link", "")
+                if not url:
+                    continue
+                title = getattr(entry, "title", "").strip()
+                if not title:
+                    continue
+                # Quick relevance pre-check on title
+                if not is_startup_relevant(title, trusted=feed_cfg["trusted"]):
+                    continue
+
+                # Fetch article page
+                page = await extract_article_page(client, url)
+                if not page["image"]:
+                    continue
+                if not is_startup_relevant(title, page["text"], trusted=feed_cfg["trusted"]):
+                    continue
+
+                ok = await save_startup_article(
+                    client=client,
+                    title=title,
+                    url=url,
+                    image=page["image"],
+                    text=page["text"],
+                    published_at=page["published_at"] or datetime.now(timezone.utc).isoformat(),
+                    source=feed_cfg["source"],
+                    trusted=feed_cfg["trusted"],
+                )
+                if ok:
+                    added += 1
+                await asyncio.sleep(0.2)
+        except Exception as e:
+            logger.error(f"RSS feed error [{feed_cfg['source']}]: {e}")
     return added
 
 
-# ===== DECCAN CHRONICLE SCRAPER =====
-async def scrape_deccan_chronicle():
+# ── Entrackr sitemap scraper ───────────────────────────────────────────────────
+
+async def scrape_entrackr_sitemap(client: httpx.AsyncClient, max_days: int = 7) -> int:
+    """Scrape Entrackr daily sitemaps for last N days."""
     added = 0
     try:
-        async with httpx.AsyncClient(timeout=30.0, follow_redirects=True) as http:
-            resp = await http.get("https://www.deccanchronicle.com/", headers=HEADERS)
-            resp.raise_for_status()
-        soup = BeautifulSoup(resp.text, 'html.parser')
-        articles = []
-        for tag in soup.find_all(['h2', 'h5']):
-            a = tag.find('a')
-            if not a or not a.get('href'):
-                continue
-            link = a['href']
-            if not link.startswith('http'):
-                link = f"https://www.deccanchronicle.com{link}"
-            title = a.get_text(strip=True)
-            if not title or 'deccanchronicle.com' not in link or len(title) < 10:
-                continue
-            if any(x['link'] == link for x in articles):
-                continue
-            image = ""
-            parent = tag.parent
-            if parent:
-                img = parent.find('img')
-                if not img:
-                    img = parent.find_previous('img')
-                if img:
-                    src = img.get('data-src') or img.get('src') or ""
-                    if src and 'placeholder' not in src:
-                        image = src if src.startswith('http') else f"https://www.deccanchronicle.com{src}"
-            articles.append({"link": link, "title": title[:200], "summary": title, "image": image, "category": cat_from_url(link, DC_CATEGORY_MAP)})
-        for a in articles[:30]:
-            if await save_article(a, "deccanchronicle.com"):
-                added += 1
+        r = await client.get("https://entrackr.com/sitemap.xml", headers=HEADERS, timeout=20)
+        if r.status_code != 200:
+            return 0
+        soup = BeautifulSoup(r.text, "html.parser")
+        sitemap_locs = [loc.get_text(strip=True) for loc in soup.find_all("loc")][:max_days]
+
+        for sm_url in sitemap_locs:
+            try:
+                r2 = await client.get(sm_url, headers=HEADERS, timeout=15)
+                if r2.status_code != 200:
+                    continue
+                soup2 = BeautifulSoup(r2.text, "html.parser")
+                locs = [loc.get_text(strip=True) for loc in soup2.find_all("loc")]
+
+                # Alternate: article_url, image_url, article_url, image_url...
+                for i in range(0, len(locs) - 1, 2):
+                    art_url = locs[i]
+                    img_url = locs[i + 1] if i + 1 < len(locs) else ""
+
+                    if "entrackr.com" not in art_url or art_url.endswith(".xml"):
+                        continue
+
+                    page = await extract_article_page(client, art_url)
+                    img = page["image"] or img_url
+                    if not img:
+                        continue
+
+                    # Get title from article page h1
+                    title = ""
+                    try:
+                        rp = await client.get(art_url, headers=HEADERS, timeout=18, follow_redirects=True)
+                        if rp.status_code == 200:
+                            sp = BeautifulSoup(rp.text, "html.parser")
+                            h1 = sp.find("h1")
+                            if h1:
+                                title = h1.get_text(strip=True)
+                    except Exception:
+                        pass
+                    if not title:
+                        title = art_url.split("/")[-1].replace("-", " ").title()
+
+                    if not is_startup_relevant(title, page["text"], trusted=True):
+                        continue
+
+                    ok = await save_startup_article(
+                        client=client,
+                        title=title,
+                        url=art_url,
+                        image=img,
+                        text=page["text"],
+                        published_at=page["published_at"] or datetime.now(timezone.utc).isoformat(),
+                        source="Entrackr",
+                        trusted=True,
+                    )
+                    if ok:
+                        added += 1
+                    await asyncio.sleep(0.3)
+            except Exception as e:
+                logger.error(f"Entrackr sitemap entry error: {e}")
     except Exception as e:
-        logger.error(f"Deccan Chronicle scraper error: {e}")
+        logger.error(f"Entrackr sitemap error: {e}")
     return added
 
 
-# ===== TIMES OF INDIA SCRAPER =====
-async def scrape_toi():
-    added = 0
-    try:
-        async with httpx.AsyncClient(timeout=30.0, follow_redirects=True) as http:
-            resp = await http.get("https://timesofindia.indiatimes.com/", headers=HEADERS)
-            resp.raise_for_status()
-        soup = BeautifulSoup(resp.text, 'html.parser')
-        articles = []
-        for a_tag in soup.find_all('a', href=True):
-            link = a_tag['href']
-            if '/articleshow/' not in link:
-                continue
-            if not link.startswith('http'):
-                link = f"https://timesofindia.indiatimes.com{link}"
-            title = a_tag.get_text(strip=True)
-            if not title or len(title) < 15 or 'indiatimes.com' not in link:
-                continue
-            if any(x['link'] == link for x in articles):
-                continue
-            image = ""
-            img = a_tag.find('img')
-            if not img:
-                parent = a_tag.parent
-                if parent:
-                    img = parent.find('img')
-            if img:
-                image = img.get('data-src') or img.get('src') or ""
-                if image and not image.startswith('http'):
-                    image = ""
-            articles.append({"link": link, "title": title[:200], "summary": title, "image": image, "category": cat_from_url(link, TOI_CATEGORY_MAP)})
-        for a in articles[:30]:
-            if await save_article(a, "timesofindia.com"):
-                added += 1
-    except Exception as e:
-        logger.error(f"TOI scraper error: {e}")
-    return added
+# ── Main scraper loop ──────────────────────────────────────────────────────────
 
-
-# ===== EENADU TELUGU SCRAPER =====
-async def scrape_eenadu():
-    added = 0
-    try:
-        async with httpx.AsyncClient(timeout=30.0, follow_redirects=True) as http:
-            resp = await http.get("https://www.eenadu.net/", headers=HEADERS)
-            resp.raise_for_status()
-        soup = BeautifulSoup(resp.text, 'html.parser')
-        articles = []
-        for a_tag in soup.find_all('a', href=True):
-            link = a_tag['href']
-            if '/telugu-news/' not in link and '/telugu-article/' not in link:
-                continue
-            if not link.startswith('http'):
-                link = f"https://www.eenadu.net{link}"
-            title = a_tag.get_text(strip=True)
-            if not title or len(title) < 5 or 'eenadu.net' not in link:
-                continue
-            if any(x['link'] == link for x in articles):
-                continue
-            image = ""
-            img = a_tag.find('img')
-            if not img:
-                parent = a_tag.parent
-                if parent:
-                    img = parent.find('img')
-            if img:
-                image = img.get('data-src') or img.get('src') or ""
-                if image and not image.startswith('http'):
-                    image = ""
-            articles.append({"link": link, "title": title[:200], "summary": title, "image": image, "category": cat_from_url(link, EENADU_CATEGORY_MAP), "_telugu": True})
-        for a in articles[:30]:
-            if await save_article(a, "eenadu.net"):
-                added += 1
-    except Exception as e:
-        logger.error(f"Eenadu scraper error: {e}")
-    return added
-
-
-# ===== WAY2NEWS TELUGU SCRAPER =====
-async def scrape_way2news():
-    added = 0
-    try:
-        async with httpx.AsyncClient(timeout=30.0, follow_redirects=True) as http:
-            resp = await http.get("https://telugu.way2news.com/", headers=HEADERS)
-            resp.raise_for_status()
-        soup = BeautifulSoup(resp.text, 'html.parser')
-        articles = []
-        for h1 in soup.find_all('h1'):
-            a = h1.find('a')
-            if not a or not a.get('href'):
-                continue
-            link = a['href']
-            if not link.startswith('http'):
-                link = f"https://telugu.way2news.com/{link.lstrip('/')}"
-            title = a.get_text(strip=True)
-            if not title or len(title) < 5:
-                continue
-            if any(x['link'] == link for x in articles):
-                continue
-            image = ""
-            parent = h1.parent
-            if parent:
-                img = parent.find('img')
-                if img:
-                    image = img.get('data-src') or img.get('data-lazy-src') or img.get('src') or ""
-            summary = ""
-            if parent:
-                for p in parent.find_all('p'):
-                    text = p.get_text(strip=True)
-                    if text and len(text) > 20:
-                        summary = text
-                        break
-            articles.append({"link": link, "title": title[:200], "summary": summary or title, "image": image, "category": "", "_telugu": True})
-        for a in articles[:20]:
-            if await save_article(a, "way2news.com"):
-                added += 1
-    except Exception as e:
-        logger.error(f"Way2News scraper error: {e}")
-    return added
-
-
-# ===== SCRAPER LOOP =====
 async def scraper_loop():
-    await asyncio.sleep(5)
+    await asyncio.sleep(10)  # Let server fully start
     while True:
         global scraper_status
         scraper_status["running"] = True
         scraper_status["error"] = None
         total = 0
-        new_article_ids = []
         try:
-            results = await asyncio.gather(
-                scrape_siasat(),
-                scrape_deccan_chronicle(),
-                scrape_toi(),
-                scrape_eenadu(),
-                scrape_way2news(),
-                return_exceptions=True
-            )
-            for r in results:
-                if isinstance(r, int):
-                    total += r
-                elif isinstance(r, Exception):
-                    logger.error(f"Scraper error: {r}")
+            async with httpx.AsyncClient(verify=False, follow_redirects=True) as client:
+                # RSS feeds first
+                rss_added = await scrape_rss_feeds(client)
+                total += rss_added
+                logger.info(f"RSS scrapers: +{rss_added}")
+
+                # Entrackr sitemap (last 3 days)
+                et_added = await scrape_entrackr_sitemap(client, max_days=3)
+                total += et_added
+                logger.info(f"Entrackr sitemap: +{et_added}")
+
             scraper_status["last_run"] = datetime.now(timezone.utc).isoformat()
             scraper_status["articles_added"] = total
-            logger.info(f"All scrapers done: {total} new articles added")
-            # Run AI agents after scraping (fire-and-forget)
+            logger.info(f"Scraper cycle done: {total} new articles")
+
             if total > 0:
-                try:
-                    from routes.agents import run_agents_after_scrape
-                    asyncio.create_task(run_agents_after_scrape())
-                except Exception as ae:
-                    logger.error(f"Agent launch error: {ae}")
-                # Run SEO processing (meta generation + IndexNow ping)
+                # Fire SEO processing
                 try:
                     from routes.seo_engine import seo_after_scrape
-                    # Get recently added article IDs
-                    cutoff = (datetime.now(timezone.utc) - timedelta(minutes=5)).isoformat()
+                    cutoff = (datetime.now(timezone.utc) - timedelta(minutes=10)).isoformat()
                     recent = await db.news.find(
                         {"created_at": {"$gte": cutoff}}, {"_id": 0, "id": 1}
                     ).to_list(100)
@@ -346,34 +463,52 @@ async def scraper_loop():
                         asyncio.create_task(seo_after_scrape(ids))
                 except Exception as se:
                     logger.error(f"SEO after scrape error: {se}")
+
         except Exception as e:
             scraper_status["error"] = str(e)
             logger.error(f"Scraper loop error: {e}")
         finally:
             scraper_status["running"] = False
-        await asyncio.sleep(1800)  # 30 minutes
 
+        await asyncio.sleep(3600)  # Run every 60 minutes
+
+
+# ── API endpoints ──────────────────────────────────────────────────────────────
 
 @router.post("/scraper/trigger")
 async def trigger_scraper():
     if scraper_status["running"]:
         return {"status": "already_running"}
+    scraper_status["running"] = True
     total = 0
-    results = await asyncio.gather(scrape_siasat(), scrape_deccan_chronicle(), scrape_toi(), scrape_eenadu(), scrape_way2news(), return_exceptions=True)
-    for r in results:
-        if isinstance(r, int):
-            total += r
+    try:
+        async with httpx.AsyncClient(verify=False, follow_redirects=True) as client:
+            rss = await scrape_rss_feeds(client)
+            et = await scrape_entrackr_sitemap(client, max_days=3)
+            total = rss + et
+    except Exception as e:
+        scraper_status["error"] = str(e)
+    finally:
+        scraper_status["running"] = False
+        scraper_status["articles_added"] = total
+        scraper_status["last_run"] = datetime.now(timezone.utc).isoformat()
     return {"status": "completed", "articles_added": total}
+
 
 @router.get("/scraper/status")
 async def get_scraper_status():
     return scraper_status
 
+
 @router.get("/notifications/breaking")
 async def get_breaking_news():
     cutoff = (datetime.now(timezone.utc) - timedelta(minutes=35)).isoformat()
-    articles = await db.news.find({"created_at": {"$gte": cutoff}, "is_active": True}, {"_id": 0, "id": 1, "title": 1, "category": 1, "image": 1}).sort("created_at", -1).limit(5).to_list(5)
+    articles = await db.news.find(
+        {"created_at": {"$gte": cutoff}, "is_active": True},
+        {"_id": 0, "id": 1, "title": 1, "category": 1, "image": 1}
+    ).sort("created_at", -1).limit(5).to_list(5)
     return {"breaking": articles, "count": len(articles)}
+
 
 @router.get("/health")
 async def health_check():
