@@ -66,31 +66,40 @@ export default function ArticlePage() {
       {/* Article */}
       <article className="max-w-3xl mx-auto px-4 py-5">
         <div className="flex items-center gap-2 mb-3">
-          <span className="px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-orange-500 text-white rounded">{category}</span>
+          <span className="px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-[#0052CC] text-white rounded">{category}</span>
           <span className={`flex items-center gap-1 text-[11px] ${darkMode ? "text-slate-500" : "text-slate-400"}`}>
             <Clock size={11} />
-            {getExactTime(article.published_at)} · {(() => { try { return formatDistanceToNow(new Date(article.published_at), { addSuffix: true }); } catch { return ""; } })()}
+            {/* Use published_at — the original source publication date */}
+            {getExactTime(article.published_at || article.created_at)}
           </span>
         </div>
 
-        <h1 className={`text-2xl sm:text-3xl font-bold leading-tight mb-4 ${darkMode ? "text-white" : "text-slate-900"}`}>{title}</h1>
+        <h1 className={`text-2xl sm:text-3xl font-serif-display font-bold leading-tight mb-4 ${darkMode ? "text-white" : "text-slate-900"}`}>{title}</h1>
 
-        {article.image && (
-          <div className="mb-5 rounded-xl overflow-hidden relative">
-            <img src={article.image} alt={title} className="w-full max-h-[400px] object-cover" />
-
-            {/* The Venture Republic Logo Watermark — bottom-right */}
-            <div className="absolute bottom-2 right-2 pointer-events-none select-none">
-              <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-black/45 backdrop-blur-sm">
-                <img src="/tvr-logo.png" alt="The Venture Republic" className="h-4 w-auto" />
-                <span className="text-[10px] font-bold text-white uppercase tracking-wider">The Venture Republic</span>
-              </div>
-            </div>
+        {/* Source attribution with link */}
+        {article.source && (
+          <div className={`flex items-center gap-2 mb-4 pb-4 border-b ${darkMode ? "border-slate-800" : "border-slate-100"}`}>
+            <span className={`text-xs ${darkMode ? "text-slate-400" : "text-slate-500"}`}>Source:</span>
+            {article.source_url ? (
+              <a
+                href={article.source_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs font-semibold text-[#0052CC] hover:underline flex items-center gap-1"
+              >
+                {article.source}
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+              </a>
+            ) : (
+              <span className="text-xs font-semibold text-[#0052CC]">{article.source}</span>
+            )}
           </div>
         )}
 
-        {article.source && (
-          <p className={`text-xs mb-4 ${darkMode ? "text-slate-500" : "text-slate-400"}`}>Source: {article.source}</p>
+        {article.image && (
+          <div className="mb-5 rounded-xl overflow-hidden">
+            <img src={article.image} alt={title} className="w-full max-h-[420px] object-cover" />
+          </div>
         )}
 
         <div className={`text-base leading-relaxed whitespace-pre-line ${darkMode ? "text-slate-300" : "text-slate-700"}`}>

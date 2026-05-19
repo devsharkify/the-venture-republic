@@ -161,16 +161,12 @@ function AppContent() {
   }, [savedArticles]);
 
   const openArticle = useCallback((article, list = []) => {
-    setSelectedArticle(article);
-    if (list.length > 0) {
-      setArticlesList(list);
-      const idx = list.findIndex(a => a.id === article.id);
-      setArticleIndex(idx >= 0 ? idx : 0);
-    } else {
-      setArticlesList([]);
-      setArticleIndex(-1);
+    // Open as full page instead of modal
+    const articleId = article._id || article.id;
+    if (articleId) {
+      navigate(`/news/${articleId}`);
     }
-  }, []);
+  }, [navigate]);
 
   const closeArticle = useCallback(() => {
     setSelectedArticle(null);
