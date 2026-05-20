@@ -1,7 +1,7 @@
 import { useContext } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { AppContext } from "../App";
-import { Moon, Sun, Settings, ArrowLeft, LogOut, Menu } from "lucide-react";
+import { Moon, Sun, Settings, ArrowLeft, LogOut } from "lucide-react";
 
 export const Header = () => {
   const { darkMode, toggleDarkMode, isAdmin, isLoggedIn, handleLogout } = useContext(AppContext);
@@ -31,43 +31,30 @@ export const Header = () => {
         className={`h-8 flex items-center ${
           darkMode
             ? "bg-[#0A0F1C] border-b border-slate-800"
-            : "bg-[#0052CC] text-white"
+            : "bg-[#0F172A]"
         }`}
       >
         <div className="max-w-screen-xl mx-auto px-4 w-full flex items-center justify-between">
           {/* Left: date */}
-          <span
-            className={`text-[10px] font-medium tracking-wide ${
-              darkMode ? "text-slate-400" : "text-blue-100"
-            }`}
-          >
+          <span className="text-[10px] font-medium tracking-wide text-slate-400">
             {formattedDate}
           </span>
 
           {/* Center: tagline — hidden on mobile */}
-          <span
-            className={`hidden md:block text-[10px] font-semibold tracking-[0.15em] uppercase ${
-              darkMode ? "text-slate-400" : "text-white"
-            }`}
-          >
+          <span className="hidden md:block text-[10px] font-semibold tracking-[0.15em] uppercase text-slate-300">
             India&rsquo;s Premier Startup Intelligence Platform
           </span>
 
-          {/* Right: dark mode toggle + profile (utility bar icons, desktop only) */}
+          {/* Right: dark mode toggle */}
           <div className="flex items-center gap-1">
             <button
               data-testid="dark-mode-toggle"
               onClick={toggleDarkMode}
-              className={`p-1 rounded transition-colors ${
-                darkMode
-                  ? "text-slate-400 hover:text-slate-200 hover:bg-slate-800"
-                  : "text-blue-100 hover:text-white hover:bg-blue-700"
-              }`}
+              className="p-1 rounded transition-colors text-slate-400 hover:text-slate-200 hover:bg-slate-700"
               aria-label="Toggle dark mode"
             >
               {darkMode ? <Sun size={13} /> : <Moon size={13} />}
             </button>
-
           </div>
         </div>
       </div>
@@ -81,9 +68,9 @@ export const Header = () => {
         }`}
       >
         <div className="max-w-screen-xl mx-auto px-4 flex items-center justify-between">
-          {/* Left: hamburger or back arrow */}
+          {/* Left: back arrow (only on inner pages) */}
           <div className="flex items-center w-[80px]">
-            {!isHomePage ? (
+            {!isHomePage && (
               <button
                 data-testid="back-btn"
                 onClick={() =>
@@ -97,17 +84,6 @@ export const Header = () => {
                 aria-label="Go back"
               >
                 <ArrowLeft size={20} />
-              </button>
-            ) : (
-              <button
-                aria-label="Menu"
-                className={`p-2 -ml-1 rounded-lg transition-colors ${
-                  darkMode
-                    ? "text-slate-400 hover:bg-slate-800"
-                    : "text-slate-500 hover:bg-slate-100"
-                }`}
-              >
-                <Menu size={20} />
               </button>
             )}
           </div>
