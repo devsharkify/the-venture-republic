@@ -1,12 +1,20 @@
 # ── Stage 1: Build React frontend ────────────────────────────────────────────
-FROM node:20-slim AS frontend-builder
+FROM node:18-slim AS frontend-builder
 
 WORKDIR /frontend
+
+# Copy package files + patch script FIRST so postinstall can run the ajv patch
 COPY frontend/package*.json ./
+COPY frontend/scripts ./scripts
+
 RUN npm install --legacy-peer-deps
 
+# Now copy the rest of the source
 COPY frontend/ .
+
 RUN DISABLE_ESLINT_PLUGIN=true \
+    SKIP_PREFLIGHT_CHECK=true \
+    GENERATE_SOURCEMAP=false \
     REACT_APP_BACKEND_URL=https://api.venturerepublic.in \
     npm run build
 
