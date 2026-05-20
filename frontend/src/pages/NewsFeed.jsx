@@ -538,16 +538,18 @@ export default function NewsFeed() {
             </div>
           )}
 
-          {/* ── 3-column grid for remaining articles ── */}
+          {/* ── Article cards — flexbox so last row has no empty slots ── */}
           {articles.length > 3 && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            <div className="flex flex-wrap gap-5">
               {articles.slice(3).map((article, index) => (
-                <NewsCard key={article.id} article={article} index={index + 3} articlesList={articles} />
+                <div key={article.id} className="w-full md:w-[calc(50%-10px)] lg:w-[calc(33.333%-14px)]">
+                  <NewsCard article={article} index={index + 3} articlesList={articles} />
+                </div>
               ))}
             </div>
           )}
 
-          {/* Load more */}
+          {/* Load more — always visible while there are more articles */}
           {hasMore && (
             <div className="flex justify-center mt-10 mb-6">
               <Button
