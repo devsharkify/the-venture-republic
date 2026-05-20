@@ -11,6 +11,8 @@ const SECTIONS = [
   { label: "Policy", href: "/?cat=policy" },
   { label: "IPO & Markets", href: "/?cat=ipo" },
   { label: "Venture Capital", href: "/?cat=vc" },
+  { label: "SaaS", href: "/?cat=saas" },
+  { label: "D2C", href: "/?cat=d2c" },
 ];
 
 const COMPANY = [
@@ -41,7 +43,7 @@ export const Footer = () => {
       <div className="h-[2px] bg-slate-700" />
 
       {/* Main grid */}
-      <div className="max-w-screen-xl mx-auto px-6 pt-4 pb-3">
+      <div className="max-w-screen-xl mx-auto px-6 pt-3 pb-2">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
 
           {/* Column 1 — Brand */}
@@ -54,12 +56,12 @@ export const Footer = () => {
             </p>
           </div>
 
-          {/* Column 2 — Sections */}
+          {/* Column 2 — Sections (5 + 5 side by side) */}
           <div>
             <h3 className="text-[9px] font-black uppercase tracking-[0.22em] text-slate-600 mb-2.5">
               Sections
             </h3>
-            <nav className="flex flex-col gap-1.5">
+            <nav className="grid grid-cols-2 gap-x-4 gap-y-1.5">
               {SECTIONS.map(({ label, href }) => (
                 <a key={label} href={href}
                   className="text-[11px] text-slate-400 hover:text-white transition-colors duration-150">
