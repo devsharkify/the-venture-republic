@@ -47,6 +47,14 @@ axios.interceptors.request.use((config) => {
 
 export const AppContext = createContext();
 
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+}
+
 function AppContent() {
   const [language, setLanguage] = useState(() => {
     const saved = localStorage.getItem("preferredLanguage");
@@ -228,6 +236,7 @@ function AppContent() {
   return (
     <AppContext.Provider value={contextValue}>
       <div className={`min-h-screen ${darkMode ? "dark bg-slate-900" : "bg-slate-50"}`}>
+        <ScrollToTop />
         {!isSwipeMode && !isReporterPage && !isLoginPage && <Header />}
         <main className={`${isAdminPage || isSwipeMode || isReporterPage ? "" : "safe-area-bottom"}`}>
           <Routes>
