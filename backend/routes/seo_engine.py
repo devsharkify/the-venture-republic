@@ -5,11 +5,23 @@ from typing import Optional
 from datetime import datetime, timezone, timedelta
 from database import db, logger, CATEGORIES, EMERGENT_LLM_KEY
 from emergentintegrations.llm.chat import LlmChat, UserMessage
+from email.utils import format_datetime as _rfc822_fmt
+import datetime as _dt
 import httpx
 import uuid
 import asyncio
 import os
 import re
+
+
+def _to_rfc822(iso_str: str) -> str:
+    try:
+        dt = _dt.datetime.fromisoformat(iso_str.replace("Z", "+00:00"))
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=_dt.timezone.utc)
+        return _rfc822_fmt(dt)
+    except Exception:
+        return iso_str
 
 router = APIRouter(prefix="/api/seo-engine")
 
@@ -72,13 +84,19 @@ async def sitemap_xml():
         # Google News tags for articles published in last 2 days
         news_tag = ""
         if a.get("published_at", "") >= news_cutoff:
+            _pub_date_raw = a.get("published_at", "")
+            if _pub_date_raw:
+                if len(_pub_date_raw) == 10:
+                    _pub_date_raw = _pub_date_raw + "T00:00:00Z"
+                elif not (_pub_date_raw.endswith("Z") or "+" in _pub_date_raw[-6:]):
+                    _pub_date_raw = _pub_date_raw + "Z"
             news_tag = f"""
     <news:news>
       <news:publication>
         <news:name>{SITE_NAME}</news:name>
         <news:language>en</news:language>
       </news:publication>
-      <news:publication_date>{pub_date}</news:publication_date>
+      <news:publication_date>{_pub_date_raw}</news:publication_date>
       <news:title>{safe_title}</news:title>
       <news:keywords>{cat_label}</news:keywords>
     </news:news>"""
@@ -104,7 +122,7 @@ async def sitemap_xml():
         xmlns:xhtml="http://www.w3.org/1999/xhtml">
 {chr(10).join(urls)}
 </urlset>"""
-    return Response(content=xml, media_type="application/xml")
+    return Response(content=xml, media_type="application/xml", headers={"Cache-Control": "public, max-age=3600"})
 
 
 # ============================================================
@@ -134,11 +152,10 @@ Allow: /
 Allow: /news/
 
 Sitemap: {SITE_URL}/sitemap.xml
-Sitemap: {SITE_URL}/rss.xml
 
 # The Venture Republic - Indian News Platform
 # Contact: admin@kaizernews.com"""
-    return Response(content=content, media_type="text/plain")
+    return Response(content=content, media_type="text/plain", headers={"Cache-Control": "public, max-age=3600"})
 
 
 # ============================================================
@@ -173,7 +190,7 @@ async def rss_feed():
       <link>{link}</link>
       <guid isPermaLink="true">{link}</guid>
       <description><![CDATA[{desc}]]></description>{kw_tags}
-      <pubDate>{pub_date}</pubDate>
+      <pubDate>{_to_rfc822(a.get("published_at", ""))}</pubDate>
       <source url="{SITE_URL}">{SITE_NAME}</source>{image_tag}
     </item>""")
 
@@ -195,7 +212,7 @@ async def rss_feed():
 {chr(10).join(items)}
   </channel>
 </rss>"""
-    return Response(content=xml, media_type="application/xml")
+    return Response(content=xml, media_type="application/xml", headers={"Cache-Control": "public, max-age=3600"})
 
 
 # ============================================================
@@ -435,6 +452,12 @@ async def ping_indexnow(urls: list):
             # Submit to Bing
             r = await client.post("https://api.indexnow.org/indexnow", json=payload)
             logger.info(f"IndexNow ping: {len(urls)} URLs, status={r.status_code}")
+            # Ping Google Search Console sitemap
+            try:
+                gsc_url = f"https://www.google.com/ping?sitemap={SITE_URL}/api/seo-engine/sitemap.xml"
+                await client.get(gsc_url, timeout=8)
+            except Exception:
+                pass
     except Exception as e:
         logger.warning(f"IndexNow ping failed: {e}")
 
@@ -499,6 +522,15 @@ Return ONLY valid JSON, no markdown."""
         logger.warning(f"SEO meta generation failed for {article_id}: {e}")
 
 
+_seo_sem = asyncio.Semaphore(5)
+
+
+async def _gen_one(article_id: str):
+    async with _seo_sem:
+        await generate_seo_meta(article_id)
+        await asyncio.sleep(0.3)
+
+
 async def batch_generate_seo_meta(limit=20):
     """Generate SEO meta for articles that don't have it yet."""
     articles = await db.news.find(
@@ -506,13 +538,9 @@ async def batch_generate_seo_meta(limit=20):
         {"_id": 0, "id": 1}
     ).sort("published_at", -1).limit(limit).to_list(limit)
 
-    count = 0
-    for a in articles:
-        await generate_seo_meta(a["id"])
-        count += 1
-        await asyncio.sleep(1)  # Rate limit
-
-    return count
+    article_ids = [a["id"] for a in articles]
+    await asyncio.gather(*[_gen_one(aid) for aid in article_ids])
+    return len(article_ids)
 
 
 # ============================================================
@@ -521,10 +549,8 @@ async def batch_generate_seo_meta(limit=20):
 
 async def seo_after_scrape(new_article_ids: list):
     """Run after scraper: generate SEO meta + ping IndexNow + regenerate static files."""
-    # Generate SEO meta for new articles
-    for aid in new_article_ids[:20]:
-        await generate_seo_meta(aid)
-        await asyncio.sleep(0.5)
+    # Generate SEO meta for new articles in parallel
+    await asyncio.gather(*[_gen_one(aid) for aid in new_article_ids[:20]])
 
     # Ping IndexNow with new URLs
     if new_article_ids:
@@ -689,7 +715,6 @@ Allow: /
 Allow: /news/
 
 Sitemap: {SITE_URL}/sitemap.xml
-Sitemap: {SITE_URL}/rss.xml
 
 # The Venture Republic - Indian News Platform"""
         with open(f"{FRONTEND_PUBLIC}/robots.txt", "w") as f:
@@ -723,7 +748,13 @@ Sitemap: {SITE_URL}/rss.xml
 
             news_tag = ""
             if a.get("published_at", "") >= news_cutoff:
-                news_tag = f'\n    <news:news>\n      <news:publication>\n        <news:name>{SITE_NAME}</news:name>\n        <news:language>en</news:language>\n      </news:publication>\n      <news:publication_date>{pub_date}</news:publication_date>\n      <news:title>{safe_title}</news:title>\n      <news:keywords>{cat_label}</news:keywords>\n    </news:news>'
+                _spd_raw = a.get("published_at", "")
+                if _spd_raw:
+                    if len(_spd_raw) == 10:
+                        _spd_raw = _spd_raw + "T00:00:00Z"
+                    elif not (_spd_raw.endswith("Z") or "+" in _spd_raw[-6:]):
+                        _spd_raw = _spd_raw + "Z"
+                news_tag = f'\n    <news:news>\n      <news:publication>\n        <news:name>{SITE_NAME}</news:name>\n        <news:language>en</news:language>\n      </news:publication>\n      <news:publication_date>{_spd_raw}</news:publication_date>\n      <news:title>{safe_title}</news:title>\n      <news:keywords>{cat_label}</news:keywords>\n    </news:news>'
 
             hreflang_tags = f'\n    <xhtml:link rel="alternate" hreflang="en" href="{article_url}" />'
             if a.get("title_te"):
@@ -763,7 +794,7 @@ Sitemap: {SITE_URL}/rss.xml
       <link>{link}</link>
       <guid isPermaLink="true">{link}</guid>
       <description><![CDATA[{d}]]></description>{kw_tags}
-      <pubDate>{a.get('published_at', '')}</pubDate>
+      <pubDate>{_to_rfc822(a.get('published_at', ''))}</pubDate>
       <source url="{SITE_URL}">{SITE_NAME}</source>{enc}
     </item>""")
 

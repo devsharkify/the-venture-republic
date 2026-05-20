@@ -1,8 +1,9 @@
 """Social Media Expert Agent — SEO optimization, trending content, social media posts."""
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from datetime import datetime, timezone, timedelta
 from database import db, logger, EMERGENT_LLM_KEY
 from emergentintegrations.llm.chat import LlmChat, UserMessage
+from auth_dep import require_admin
 import uuid
 import asyncio
 import json
@@ -165,7 +166,7 @@ async def generate_seo_telegram_report():
 # ============================================================
 
 @router.post("/run")
-async def api_run_seo():
+async def api_run_seo(_: str = Depends(require_admin)):
     """Run SEO agent as subprocess (non-blocking)."""
     import subprocess
     subprocess.Popen(

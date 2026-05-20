@@ -21,9 +21,10 @@ RULE 3 — STARTUP RELEVANCE:
   accepted.
 ══════════════════════════════════════════════════════════════════════
 """
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from datetime import datetime, timezone, timedelta
 import asyncio, uuid, os, re, base64
+from auth_dep import require_admin
 import feedparser
 import httpx
 from bs4 import BeautifulSoup
@@ -583,7 +584,7 @@ async def scraper_loop():
 # ── API endpoints ──────────────────────────────────────────────────────────────
 
 @router.post("/scraper/trigger")
-async def trigger_scraper():
+async def trigger_scraper(_: str = Depends(require_admin)):
     if scraper_status["running"]:
         return {"status": "already_running"}
     scraper_status["running"] = True
@@ -625,7 +626,7 @@ async def health_check():
 # ── Bulk watermark re-scan ─────────────────────────────────────────────────────
 
 @router.post("/scraper/rescan-watermarks")
-async def rescan_watermarks():
+async def rescan_watermarks(_: str = Depends(require_admin)):
     """
     Re-scan ALL active articles for watermarks using the updated Gemini Vision prompt.
     Deletes any article whose image is flagged. Returns a summary.

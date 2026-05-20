@@ -1,9 +1,10 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from typing import List
 import re
 from database import db
 from models import LiveChannel, LiveChannelCreate, YouTubeShort, YouTubeShortCreate
 from helpers import prepare_for_mongo
+from auth_dep import require_admin
 
 router = APIRouter(prefix="/api")
 
@@ -21,7 +22,7 @@ async def get_live_channels():
     return channels
 
 @router.post("/live-tv")
-async def add_live_channel(data: LiveChannelCreate):
+async def add_live_channel(data: LiveChannelCreate, _: str = Depends(require_admin)):
     yt_id = extract_youtube_id(data.youtube_url)
     channel = LiveChannel(name=data.name, youtube_url=data.youtube_url, youtube_id=yt_id)
     doc = prepare_for_mongo(channel.model_dump())
@@ -29,7 +30,7 @@ async def add_live_channel(data: LiveChannelCreate):
     return {"status": "added", "channel": channel.model_dump()}
 
 @router.delete("/live-tv/{channel_id}")
-async def delete_live_channel(channel_id: str):
+async def delete_live_channel(channel_id: str, _: str = Depends(require_admin)):
     result = await db.live_channels.delete_one({"id": channel_id})
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Channel not found")
@@ -41,7 +42,7 @@ async def get_shorts():
     return shorts
 
 @router.post("/shorts")
-async def add_short(data: YouTubeShortCreate):
+async def add_short(data: YouTubeShortCreate, _: str = Depends(require_admin)):
     yt_id = extract_youtube_id(data.youtube_url)
     short = YouTubeShort(title=data.title or f"Short #{yt_id[:6]}", youtube_url=data.youtube_url, youtube_id=yt_id)
     doc = prepare_for_mongo(short.model_dump())
@@ -49,7 +50,7 @@ async def add_short(data: YouTubeShortCreate):
     return {"status": "added", "short": short.model_dump()}
 
 @router.post("/shorts/bulk")
-async def add_shorts_bulk(shorts: List[YouTubeShortCreate]):
+async def add_shorts_bulk(shorts: List[YouTubeShortCreate], _: str = Depends(require_admin)):
     added = []
     for data in shorts:
         yt_id = extract_youtube_id(data.youtube_url)
@@ -63,7 +64,7 @@ async def add_shorts_bulk(shorts: List[YouTubeShortCreate]):
     return {"status": "added", "count": len(added)}
 
 @router.delete("/shorts/{short_id}")
-async def delete_short(short_id: str):
+async def delete_short(short_id: str, _: str = Depends(require_admin)):
     result = await db.youtube_shorts.delete_one({"id": short_id})
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Short not found")

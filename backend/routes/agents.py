@@ -1,7 +1,8 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from datetime import datetime, timezone, timedelta
 from database import db, logger, EMERGENT_LLM_KEY
 from emergentintegrations.llm.chat import LlmChat, UserMessage
+from auth_dep import require_admin
 import uuid
 import asyncio
 
@@ -148,7 +149,7 @@ AGENT_PYTHON = "/root/.venv/bin/python3"
 
 
 @router.post("/editor/run")
-async def run_editor_agent():
+async def run_editor_agent(_: str = Depends(require_admin)):
     """Run the News Editor Agent as a subprocess (non-blocking)."""
     import subprocess
     subprocess.Popen(
@@ -363,7 +364,7 @@ async def get_investigation_topics():
 
 
 @router.post("/investigator/run/{topic_id}")
-async def run_investigation(topic_id: str):
+async def run_investigation(topic_id: str, _: str = Depends(require_admin)):
     """Run investigation on a topic as a subprocess (non-blocking)."""
     import subprocess
     subprocess.Popen(
@@ -376,7 +377,7 @@ async def run_investigation(topic_id: str):
 
 
 @router.post("/investigator/run-all")
-async def run_all_investigations():
+async def run_all_investigations(_: str = Depends(require_admin)):
     """Run all investigations as a subprocess (non-blocking)."""
     import subprocess
     subprocess.Popen(

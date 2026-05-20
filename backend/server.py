@@ -67,18 +67,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Debug route — shows build info
-@app.get("/api/debug-build")
-async def debug_build():
-    import os
-    fb = ROOT_DIR / "frontend_build"
-    return {
-        "frontend_build_exists": fb.exists(),
-        "root_dir": str(ROOT_DIR),
-        "root_contents": os.listdir(str(ROOT_DIR)),
-        "index_exists": (fb / "index.html").exists() if fb.exists() else False,
-    }
-
 # Static files — uploads
 uploads_dir = ROOT_DIR / "uploads"
 uploads_dir.mkdir(exist_ok=True)

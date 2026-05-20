@@ -41,24 +41,6 @@ async def get_all_startup_applications(status: Optional[str] = None, limit: int 
     return [parse_from_mongo(a) for a in apps]
 
 
-@router.post("/admin/startup-applications/{app_id}/update-status")
-async def update_application_status(app_id: str, status: str, reason: str = "", _: str = Depends(require_admin)):
-    if status not in ["submitted", "shortlisted", "interviewed", "selected", "rejected"]:
-        raise HTTPException(status_code=400, detail="Invalid status")
-    update = {"status": status, "updated_at": datetime.now(timezone.utc).isoformat()}
-    if status == "rejected" and reason:
-        update["rejection_reason"] = reason
-    result = await db.startup_applications.find_one_and_update(
-        {"id": app_id},
-        {"$set": update},
-        return_document=True,
-    )
-    if not result:
-        raise HTTPException(status_code=404, detail="Application not found")
-    result.pop("_id", None)
-    return {"message": f"Application marked as {status}", "application": parse_from_mongo(result)}
-
-
 @router.get("/admin/startup-applications/export")
 async def export_startup_applications_csv(status: Optional[str] = None, _: str = Depends(require_admin)):
     """Export all applications as CSV (Excel-compatible). Filter by status optional."""
@@ -90,3 +72,21 @@ async def export_startup_applications_csv(status: Optional[str] = None, _: str =
         media_type="text/csv; charset=utf-8",
         headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )
+
+
+@router.post("/admin/startup-applications/{app_id}/update-status")
+async def update_application_status(app_id: str, status: str, reason: str = "", _: str = Depends(require_admin)):
+    if status not in ["submitted", "shortlisted", "interviewed", "selected", "rejected"]:
+        raise HTTPException(status_code=400, detail="Invalid status")
+    update = {"status": status, "updated_at": datetime.now(timezone.utc).isoformat()}
+    if status == "rejected" and reason:
+        update["rejection_reason"] = reason
+    result = await db.startup_applications.find_one_and_update(
+        {"id": app_id},
+        {"$set": update},
+        return_document=True,
+    )
+    if not result:
+        raise HTTPException(status_code=404, detail="Application not found")
+    result.pop("_id", None)
+    return {"message": f"Application marked as {status}", "application": parse_from_mongo(result)}

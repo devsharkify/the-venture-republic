@@ -1,7 +1,8 @@
 """Tech Performance Agent — monitors API speed, DB performance, detects anomalies."""
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Request, Depends
 from datetime import datetime, timezone, timedelta
 from database import db, logger
+from auth_dep import require_admin
 import time
 import asyncio
 
@@ -211,7 +212,7 @@ async def performance_middleware(request: Request, call_next):
 # ============================================================
 
 @router.post("/run")
-async def api_run_tech_report():
+async def api_run_tech_report(_: str = Depends(require_admin)):
     """Generate fresh performance report."""
     report = await generate_performance_report()
     return {"status": "ok", "report": report}
@@ -274,7 +275,7 @@ async def get_endpoint_stats():
 
 
 @router.delete("/metrics/cleanup")
-async def cleanup_old_metrics():
+async def cleanup_old_metrics(_: str = Depends(require_admin)):
     """Remove metrics older than 7 days."""
     cutoff = (datetime.now(timezone.utc) - timedelta(days=7)).isoformat()
     result = await db.perf_metrics.delete_many({"timestamp": {"$lt": cutoff}})

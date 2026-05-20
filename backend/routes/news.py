@@ -125,13 +125,6 @@ async def get_news_by_category(category: str, limit: int = Query(20, ge=1, le=10
     _set_cache(cache_key, articles, ttl=30)
     return articles
 
-@router.get("/news/article/{article_id}", response_model=NewsArticle)
-async def get_article(article_id: str):
-    article = await db.news.find_one({"id": article_id}, {"_id": 0})
-    if not article:
-        raise HTTPException(status_code=404, detail="Article not found")
-    return parse_from_mongo(article)
-
 @router.post("/news/translate-batch")
 async def translate_batch(article_ids: List[str]):
     if not EMERGENT_LLM_KEY:
@@ -227,7 +220,7 @@ async def get_all_admin_news(
     }
 
 @router.put("/news/admin/{article_id}", response_model=NewsArticle)
-async def update_news(article_id: str, news: NewsUpdate):
+async def update_news(article_id: str, news: NewsUpdate, _: str = Depends(require_admin)):
     update_data = {k: v for k, v in news.model_dump().items() if v is not None}
     if not update_data:
         raise HTTPException(status_code=400, detail="No update data provided")
@@ -243,7 +236,7 @@ async def update_news(article_id: str, news: NewsUpdate):
     return parse_from_mongo(result)
 
 @router.post("/news/admin/{article_id}/pin", response_model=NewsArticle)
-async def toggle_pin(article_id: str):
+async def toggle_pin(article_id: str, _: str = Depends(require_admin)):
     article = await db.news.find_one({"id": article_id}, {"_id": 0})
     if not article:
         raise HTTPException(status_code=404, detail="Article not found")
@@ -255,7 +248,7 @@ async def toggle_pin(article_id: str):
     return parse_from_mongo(result)
 
 @router.delete("/news/admin/{article_id}")
-async def delete_news(article_id: str):
+async def delete_news(article_id: str, _: str = Depends(require_admin)):
     result = await db.news.delete_one({"id": article_id})
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Article not found")

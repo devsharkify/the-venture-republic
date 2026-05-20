@@ -1,7 +1,8 @@
 """YouTube AI Agents — Content Curator & Performance Analyzer."""
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from database import db, logger, EMERGENT_LLM_KEY
 from emergentintegrations.llm.chat import LlmChat, UserMessage
+from auth_dep import require_admin
 from datetime import datetime, timezone
 import uuid
 import asyncio
@@ -46,7 +47,7 @@ async def content_curator_report():
 
 
 @router.post("/content-curator/run")
-async def run_content_curator():
+async def run_content_curator(_: str = Depends(require_admin)):
     """Run the Content Curator agent analysis."""
     # Gather channel data
     channels_info = [
@@ -150,7 +151,7 @@ async def performance_report():
 
 
 @router.post("/performance/run")
-async def run_performance_analyzer():
+async def run_performance_analyzer(_: str = Depends(require_admin)):
     """Run the Performance Analyzer agent."""
     channels_data = [
         {"name": "RTV", "subs": 4200000, "videos": 156405, "handle": "R-Telugu-Tv"},

@@ -1,10 +1,11 @@
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Depends
 from fastapi.responses import StreamingResponse
 from datetime import datetime, timezone, timedelta
 import io
 import csv
 from database import db, logger
 from helpers import prepare_for_mongo, parse_from_mongo
+from auth_dep import require_admin
 
 router = APIRouter(prefix="/api")
 
@@ -32,7 +33,7 @@ async def get_article_stats(article_id: str):
     return {"article_id": article_id, "title": article.get("title"), "total_views": view_count, "daily_views": daily_views}
 
 @router.get("/analytics/overview")
-async def get_analytics_overview():
+async def get_analytics_overview(_: str = Depends(require_admin)):
     now = datetime.now(timezone.utc)
     today = now.replace(hour=0, minute=0, second=0, microsecond=0)
     week_ago = now - timedelta(days=7)
@@ -70,7 +71,7 @@ async def get_analytics_overview():
     }
 
 @router.get("/analytics/report/csv")
-async def download_analytics_csv(start_date: str = None, end_date: str = None):
+async def download_analytics_csv(start_date: str = None, end_date: str = None, _: str = Depends(require_admin)):
     query = {}
     if start_date:
         query["viewed_at"] = {"$gte": start_date}

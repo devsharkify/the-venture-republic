@@ -1,4 +1,5 @@
 import { useContext, useEffect, useState, useCallback, useRef } from "react";
+import { Helmet } from "react-helmet-async";
 import { AppContext, API } from "../App";
 import axios from "axios";
 import { Bookmark, BookmarkCheck, Clock, Share2, X, ChevronLeft, ChevronRight, Heart } from "lucide-react";
@@ -119,7 +120,19 @@ export const ArticleModal = () => {
       data-testid="article-modal-overlay"
       onClick={(e) => { if (e.target === e.currentTarget) closeArticle(); }}
     >
-      {/* SEO meta handled by document.title */}
+      <Helmet>
+        <title>{article.og_title || title} | The Venture Republic</title>
+        <meta name="description" content={(article.og_description || article.summary || '').slice(0, 160)} />
+        <meta property="og:title" content={article.og_title || title} />
+        <meta property="og:description" content={(article.og_description || article.summary || '').slice(0, 160)} />
+        <meta property="og:image" content={article.og_image || article.image} />
+        <meta property="og:url" content={`https://venturerepublic.in/news/${article.id}`} />
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={article.og_title || title} />
+        <meta name="twitter:description" content={(article.og_description || article.summary || '').slice(0, 160)} />
+        <meta name="twitter:image" content={article.og_image || article.image} />
+      </Helmet>
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
 

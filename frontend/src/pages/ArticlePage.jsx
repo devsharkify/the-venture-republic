@@ -1,6 +1,7 @@
 import { useState, useEffect, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { Helmet } from "react-helmet-async";
 import { API, AppContext } from "../App";
 import { Clock, ArrowLeft, Share2, Link2, Check } from "lucide-react";
 
@@ -100,10 +101,7 @@ export default function ArticlePage() {
   const category = article ? (language === "en" ? article.category_label : (article.category_label_te || article.category_label)) : "";
   const shareUrl = `https://www.theventurerepublic.in/news/${id}`;
 
-  useEffect(() => {
-    if (title) document.title = `${title} - The Venture Republic`;
-    return () => { document.title = "The Venture Republic"; };
-  }, [title]);
+  // document.title managed by <Helmet> below
 
   const getPublishedTime = (article) => {
     try {
@@ -214,6 +212,19 @@ export default function ArticlePage() {
 
   return (
     <div data-testid="article-page" className={`min-h-screen pb-10 ${darkMode ? "bg-slate-900" : "bg-[#F8FAFC]"}`}>
+      <Helmet>
+        <title>{article.og_title || article.title} | The Venture Republic</title>
+        <meta name="description" content={(article.og_description || article.summary || '').slice(0, 160)} />
+        <meta property="og:title" content={article.og_title || article.title} />
+        <meta property="og:description" content={(article.og_description || article.summary || '').slice(0, 160)} />
+        <meta property="og:image" content={article.og_image || article.image} />
+        <meta property="og:url" content={`https://venturerepublic.in/news/${article.id}`} />
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={article.og_title || article.title} />
+        <meta name="twitter:description" content={(article.og_description || article.summary || '').slice(0, 160)} />
+        <meta name="twitter:image" content={article.og_image || article.image} />
+      </Helmet>
       {/* Sticky top bar */}
       <div className={`sticky top-0 z-10 px-4 py-3 flex items-center gap-3 border-b ${darkMode ? "bg-slate-900/95 border-slate-800" : "bg-white/95 border-slate-100"} backdrop-blur`}>
         <button data-testid="article-back-btn" onClick={() => navigate(-1)} className={`p-1.5 rounded-lg ${darkMode ? "hover:bg-slate-800" : "hover:bg-slate-100"}`}>

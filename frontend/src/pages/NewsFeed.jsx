@@ -4,6 +4,7 @@ import axios from "axios";
 import { API, AppContext } from "../App";
 import { CategoryChips } from "../components/CategoryChips";
 import { NewsCard } from "../components/NewsCard";
+import NotificationBanner from "../components/NotificationBanner";
 import { Loader2, Newspaper, X, Search, Clock } from "lucide-react";
 import { Button } from "../components/ui/button";
 
@@ -374,6 +375,7 @@ export default function NewsFeed() {
 
   return (
     <div data-testid="news-feed-page" className={`min-h-screen pb-20 ${darkMode ? "bg-[#0A0F1C]" : "bg-white"}`}>
+      <NotificationBanner />
       {/* Search Bar */}
       <div className={`px-4 pt-3 pb-2 ${darkMode ? "bg-[#0A0F1C]" : "bg-white"}`}>
         <div className={`relative flex items-center rounded-lg border transition-all ${

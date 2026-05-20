@@ -7,6 +7,7 @@ import uuid
 import hashlib
 import secrets
 import time as _time
+import re
 
 router = APIRouter(prefix="/api/public/v1")
 admin_router = APIRouter(prefix="/api/apikeys", dependencies=[Depends(require_admin)])
@@ -164,12 +165,13 @@ async def public_search(
     await _validate_key(x_api_key)
 
     # Text search on title and summary
+    safe_q = re.escape(q)
     query = {
         "is_active": True,
         "$or": [
-            {"title": {"$regex": q, "$options": "i"}},
-            {"title_te": {"$regex": q, "$options": "i"}},
-            {"summary": {"$regex": q, "$options": "i"}},
+            {"title": {"$regex": safe_q, "$options": "i"}},
+            {"title_te": {"$regex": safe_q, "$options": "i"}},
+            {"summary": {"$regex": safe_q, "$options": "i"}},
         ]
     }
     skip = (page - 1) * limit

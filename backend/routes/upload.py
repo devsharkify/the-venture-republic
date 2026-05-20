@@ -1,6 +1,7 @@
-from fastapi import APIRouter, HTTPException, UploadFile, File
+from fastapi import APIRouter, HTTPException, UploadFile, File, Depends
 import uuid
 from database import db, logger, imagekit, IMAGEKIT_PUBLIC_KEY
+from auth_dep import require_admin
 
 router = APIRouter(prefix="/api")
 
@@ -31,7 +32,7 @@ def _ext(filename: str, default: str) -> str:
 
 
 @router.post("/upload/image")
-async def upload_image(file: UploadFile = File(...)):
+async def upload_image(file: UploadFile = File(...), _: str = Depends(require_admin)):
     try:
         content = await file.read()
         if len(content) > 10 * 1024 * 1024:
@@ -58,7 +59,7 @@ async def upload_image(file: UploadFile = File(...)):
 
 
 @router.post("/upload/video")
-async def upload_video(file: UploadFile = File(...)):
+async def upload_video(file: UploadFile = File(...), _: str = Depends(require_admin)):
     try:
         content = await file.read()
         if len(content) > 50 * 1024 * 1024:
@@ -85,7 +86,7 @@ async def upload_video(file: UploadFile = File(...)):
 
 
 @router.post("/upload/document")
-async def upload_document(file: UploadFile = File(...)):
+async def upload_document(file: UploadFile = File(...), _: str = Depends(require_admin)):
     try:
         ext = _ext(file.filename or "", "pdf")
         if ext not in {"pdf", "doc", "docx"}:

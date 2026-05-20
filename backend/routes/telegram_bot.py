@@ -1,6 +1,7 @@
 """Telegram Bot for The Venture Republic - sends daily reports, ePaper PDFs, error alerts."""
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Request, Depends
 from database import db, logger
+from auth_dep import require_admin
 from datetime import datetime, timezone, timedelta
 import os
 import httpx
@@ -323,14 +324,14 @@ async def telegram_webhook(request: Request):
 
 
 @router.post("/send-report/{report_type}")
-async def api_send_report(report_type: str):
+async def api_send_report(report_type: str, _: str = Depends(require_admin)):
     """Manually trigger a report."""
     success = await send_daily_report(report_type)
     return {"status": "sent" if success else "failed"}
 
 
 @router.post("/send-pdf")
-async def api_send_pdf(date: str = "", slot: str = "morning", lang: str = "en"):
+async def api_send_pdf(date: str = "", slot: str = "morning", lang: str = "en", _: str = Depends(require_admin)):
     """Manually send ePaper PDF."""
     if not date:
         date = _ist_now().strftime("%Y-%m-%d")
@@ -339,7 +340,7 @@ async def api_send_pdf(date: str = "", slot: str = "morning", lang: str = "en"):
 
 
 @router.get("/config")
-async def get_config():
+async def get_config(_: str = Depends(require_admin)):
     """Get bot configuration."""
     chat_id = await _get_admin_chat_id()
     return {"admin_chat_id": chat_id, "bot_configured": bool(BOT_TOKEN)}

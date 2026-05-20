@@ -65,7 +65,7 @@ async def get_reporter_id_card(reporter_id: str):
         raise HTTPException(status_code=404, detail="Reporter not found")
     if reporter.get("status") != "approved":
         raise HTTPException(status_code=403, detail="ID card only available for approved reporters")
-    return {"reporter_id": reporter.get("reporter_id"), "name": reporter.get("name"), "phone": reporter.get("phone"), "email": reporter.get("email"), "photo": reporter.get("photo"), "location": reporter.get("location"), "approved_at": reporter.get("approved_at"), "valid_until": "2026-12-31", "organization": "NewsPulse", "designation": "Citizen Reporter"}
+    return {"reporter_id": reporter.get("reporter_id"), "name": reporter.get("name"), "phone": reporter.get("phone"), "email": reporter.get("email"), "photo": reporter.get("photo"), "location": reporter.get("location"), "approved_at": reporter.get("approved_at"), "valid_until": "2026-12-31", "organization": "The Venture Republic", "designation": "Citizen Reporter"}
 
 # ===== ADMIN REPORTER ROUTES =====
 
