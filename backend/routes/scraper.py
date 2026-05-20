@@ -239,27 +239,33 @@ async def image_has_watermark(client: httpx.AsyncClient, image_url: str) -> bool
         ]}],
         "generationConfig": {
             "temperature": 0,
-            "maxOutputTokens": 120,
-            "responseMimeType": "application/json",
+            "maxOutputTokens": 200,
         },
     }
+    import json as _json
     try:
         api_url = WATERMARK_GEMINI_URL.format(key=GEMINI_KEY)
         resp = await client.post(api_url, json=payload, timeout=25)
+        if resp.status_code != 200:
+            logger.debug(f"Watermark API HTTP {resp.status_code} for {image_url[:60]}")
+            return False
         raw = resp.json()
         if "error" in raw:
             logger.debug(f"Watermark API error: {raw['error'].get('message','?')}")
             return False
         text = raw["candidates"][0]["content"]["parts"][0]["text"].strip()
+        # Strip markdown code fences if present
         text = text.replace("```json", "").replace("```", "").strip()
-        import json as _json
         result = _json.loads(text)
         if result.get("has_watermark"):
             logger.info(f"[WATERMARK DROP] {image_url[:60]} — {result.get('reason','')}")
             return True
         return False
+    except _json.JSONDecodeError as e:
+        logger.warning(f"Watermark JSON parse error for {image_url[:60]}: {e} | raw={text[:120] if 'text' in dir() else '?'}")
+        return False
     except Exception as e:
-        logger.debug(f"Watermark check parse error for {image_url}: {e}")
+        logger.debug(f"Watermark check error for {image_url[:60]}: {e}")
         return False
 
 
