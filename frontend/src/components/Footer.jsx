@@ -9,8 +9,8 @@ const SECTIONS = [
   { label: "Technology", href: "/?cat=technology" },
   { label: "Fintech", href: "/?cat=fintech" },
   { label: "Policy", href: "/?cat=policy" },
-  { label: "IPO", href: "/?cat=ipo" },
-  { label: "VC", href: "/?cat=vc" },
+  { label: "IPO & Markets", href: "/?cat=ipo" },
+  { label: "Venture Capital", href: "/?cat=vc" },
 ];
 
 const COMPANY = [
@@ -33,108 +33,82 @@ const SOCIALS = [
   { Icon: Instagram, href: "https://instagram.com/venturerepublic", label: "Instagram" },
 ];
 
-function ColHeading({ darkMode, children }) {
-  return (
-    <h3
-      className={`text-[10px] font-black uppercase tracking-[0.2em] pb-1 mb-3 inline-block border-b border-[#0052CC] ${
-        darkMode ? "text-slate-300" : "text-slate-700"
-      }`}
-    >
-      {children}
-    </h3>
-  );
-}
-
-function FooterLink({ href, darkMode, children }) {
-  return (
-    <a
-      href={href}
-      className={`block text-[12px] leading-relaxed transition-colors duration-150 ${
-        darkMode
-          ? "text-slate-400 hover:text-slate-100"
-          : "text-slate-500 hover:text-[#0052CC]"
-      }`}
-    >
-      {children}
-    </a>
-  );
-}
-
 export const Footer = () => {
   const { darkMode } = useContext(AppContext);
 
   return (
-    <footer
-      className={`mt-16 border-t ${
-        darkMode
-          ? "bg-[#060B16] border-slate-800/60"
-          : "bg-[#F8FAFC] border-slate-200"
-      }`}
-    >
+    <footer className="mt-16 bg-[#0F172A]">
+      {/* 2px brand accent line at top */}
+      <div className="h-[2px] bg-[#0052CC]" />
+
       {/* Main grid */}
-      <div className="max-w-screen-xl mx-auto px-6 pt-10 pb-8">
+      <div className="max-w-screen-xl mx-auto px-6 pt-12 pb-10">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-8">
 
           {/* Column 1 — Brand */}
           <div className="lg:col-span-1">
-            <div className="mb-3">
-              <span
-                className={`font-serif-display text-[22px] font-black tracking-tight leading-none ${
-                  darkMode ? "text-white" : "text-slate-900"
-                }`}
-              >
-                The Venture Republic
-              </span>
-              <div className="mt-2 w-10 h-[2px] bg-[#0052CC] rounded-full" />
-            </div>
-            <p
-              className={`text-[12px] leading-relaxed mt-3 ${
-                darkMode ? "text-slate-400" : "text-slate-500"
-              }`}
-            >
-              India's Premier Startup Intelligence Platform
+            <span className="font-serif-display text-[24px] font-black tracking-tight leading-none text-white">
+              The Venture Republic
+            </span>
+            <div className="mt-3 w-8 h-[2px] bg-[#0052CC]" />
+            <p className="text-[12px] leading-relaxed mt-4 text-slate-400">
+              India's Premier Startup Intelligence Platform — delivering real-time funding news, founder stories, and venture insights.
             </p>
-            <p
-              className={`text-[11px] mt-1 ${
-                darkMode ? "text-slate-600" : "text-slate-400"
-              }`}
-            >
+            <p className="text-[11px] mt-3 text-slate-600">
               Bengaluru, Karnataka, India
             </p>
           </div>
 
           {/* Column 2 — Sections */}
           <div>
-            <ColHeading darkMode={darkMode}>Sections</ColHeading>
-            <nav className="flex flex-col gap-1.5 mt-1">
+            <h3 className="text-[10px] font-black uppercase tracking-[0.22em] text-slate-500 mb-4">
+              Sections
+            </h3>
+            <nav className="flex flex-col gap-2">
               {SECTIONS.map(({ label, href }) => (
-                <FooterLink key={label} href={href} darkMode={darkMode}>
+                <a
+                  key={label}
+                  href={href}
+                  className="text-[13px] text-slate-400 hover:text-white transition-colors duration-150"
+                >
                   {label}
-                </FooterLink>
+                </a>
               ))}
             </nav>
           </div>
 
           {/* Column 3 — Company */}
           <div>
-            <ColHeading darkMode={darkMode}>Company</ColHeading>
-            <nav className="flex flex-col gap-1.5 mt-1">
+            <h3 className="text-[10px] font-black uppercase tracking-[0.22em] text-slate-500 mb-4">
+              Company
+            </h3>
+            <nav className="flex flex-col gap-2">
               {COMPANY.map(({ label, href }) => (
-                <FooterLink key={label} href={href} darkMode={darkMode}>
+                <a
+                  key={label}
+                  href={href}
+                  className="text-[13px] text-slate-400 hover:text-white transition-colors duration-150"
+                >
                   {label}
-                </FooterLink>
+                </a>
               ))}
             </nav>
           </div>
 
           {/* Column 4 — Legal */}
           <div>
-            <ColHeading darkMode={darkMode}>Legal</ColHeading>
-            <nav className="flex flex-col gap-1.5 mt-1">
+            <h3 className="text-[10px] font-black uppercase tracking-[0.22em] text-slate-500 mb-4">
+              Legal
+            </h3>
+            <nav className="flex flex-col gap-2">
               {LEGAL.map(({ label, href }) => (
-                <FooterLink key={label} href={href} darkMode={darkMode}>
+                <a
+                  key={label}
+                  href={href}
+                  className="text-[13px] text-slate-400 hover:text-white transition-colors duration-150"
+                >
                   {label}
-                </FooterLink>
+                </a>
               ))}
             </nav>
           </div>
@@ -143,22 +117,12 @@ export const Footer = () => {
       </div>
 
       {/* Bottom bar */}
-      <div
-        className={`border-t ${
-          darkMode ? "border-slate-800/60" : "border-slate-200"
-        }`}
-      >
-        <div className="max-w-screen-xl mx-auto px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <p
-            className={`text-[11px] ${
-              darkMode ? "text-slate-600" : "text-slate-400"
-            }`}
-          >
+      <div className="border-t border-slate-800">
+        <div className="max-w-screen-xl mx-auto px-6 py-5 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <p className="text-[11px] text-slate-600">
             &copy; {new Date().getFullYear()} The Venture Republic. All rights reserved.
           </p>
-
-          {/* Social icons */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-5">
             {SOCIALS.map(({ Icon, href, label }) => (
               <a
                 key={label}
@@ -166,13 +130,9 @@ export const Footer = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={label}
-                className={`transition-colors duration-150 ${
-                  darkMode
-                    ? "text-slate-600 hover:text-slate-200"
-                    : "text-slate-400 hover:text-[#0052CC]"
-                }`}
+                className="text-slate-600 hover:text-slate-300 transition-colors duration-150"
               >
-                <Icon size={16} strokeWidth={1.75} />
+                <Icon size={15} strokeWidth={1.75} />
               </a>
             ))}
           </div>
