@@ -661,7 +661,7 @@ async def get_related_articles(article_id: str, limit: int = Query(5, ge=1, le=1
 # STATIC FILE GENERATOR — writes sitemap.xml, robots.txt, rss.xml to frontend/public
 # ============================================================
 
-FRONTEND_PUBLIC = "/app/frontend/public"
+FRONTEND_PUBLIC = "/app/frontend_build"
 
 
 async def generate_static_seo_files():
