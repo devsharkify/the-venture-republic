@@ -59,9 +59,9 @@
   },
   "scripts": {
     "start": "craco start",
-    "build": "react-scripts build",
+    "build": "craco build",
     "test": "craco test",
-    "postinstall": "rm -rf node_modules/fork-ts-checker-webpack-plugin/node_modules node_modules/babel-loader/node_modules node_modules/file-loader/node_modules 2>/dev/null; exit 0"
+    "postinstall": "node scripts/patch-ajv-compat.js || true"
   },
   "browserslist": {
     "production": [
