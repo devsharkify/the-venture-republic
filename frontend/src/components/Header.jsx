@@ -40,6 +40,15 @@ export const Header = () => {
             {formattedDate}
           </span>
 
+          {/* Center: tagline with flanking rules — hidden on mobile */}
+          <div className="hidden md:flex items-center gap-2 flex-1 justify-center px-4">
+            <span className="flex-1 h-px bg-slate-700" />
+            <span className="text-[9px] font-semibold tracking-[0.18em] uppercase text-slate-400 whitespace-nowrap">
+              India&rsquo;s Premier Startup Intelligence Platform
+            </span>
+            <span className="flex-1 h-px bg-slate-700" />
+          </div>
+
           {/* Right: dark mode toggle */}
           <div className="flex items-center gap-1">
             <button
@@ -89,15 +98,6 @@ export const Header = () => {
             data-testid="logo"
             onClick={() => navigate("/")}
           >
-            {/* Tagline row — rules span exactly the logo width */}
-            <div className="flex items-center gap-1.5 w-full mb-0.5">
-              <span className={`flex-1 h-px ${darkMode ? "bg-slate-700" : "bg-slate-300"}`} />
-              <span className={`text-[7px] font-semibold tracking-[0.2em] uppercase whitespace-nowrap ${darkMode ? "text-slate-500" : "text-slate-400"}`}>
-                India&rsquo;s Premier Startup Intelligence Platform
-              </span>
-              <span className={`flex-1 h-px ${darkMode ? "bg-slate-700" : "bg-slate-300"}`} />
-            </div>
-
             <span
               className={`font-serif-display text-[28px] md:text-[36px] font-black tracking-tight leading-none ${
                 darkMode ? "text-white" : "text-slate-900"
