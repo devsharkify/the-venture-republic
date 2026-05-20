@@ -16,51 +16,109 @@ export const CategoryChips = ({ activeCategory, onCategoryChange }) => {
 
   useEffect(() => {
     if (scrollRef.current && activeCategory) {
-      const activeChip = scrollRef.current.querySelector(`[data-category="${activeCategory}"]`);
+      const activeChip = scrollRef.current.querySelector(
+        `[data-category="${activeCategory}"]`
+      );
       if (activeChip) {
-        activeChip.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+        activeChip.scrollIntoView({
+          behavior: "smooth",
+          inline: "center",
+          block: "nearest"
+        });
       }
     }
   }, [activeCategory]);
 
   return (
     <div
-      className={`sticky top-16 z-40 border-b ${
-        darkMode
-          ? "bg-[#0A0F1C] border-slate-800"
-          : "bg-white border-slate-200"
+      className={`sticky top-[88px] z-40 ${
+        darkMode ? "bg-[#0A0F1C]" : "bg-white"
       }`}
       data-testid="category-chips"
     >
+      {/* 2px brand-blue rule across the top of the nav strip */}
+      <div className="h-[2px] bg-[#0052CC]" />
+
+      {/* Scrollable tab row */}
       <div
         ref={scrollRef}
-        className="flex gap-0 overflow-x-auto hide-scrollbar px-4 chip-scroll-container"
+        className={`
+          flex overflow-x-auto hide-scrollbar
+          px-4 md:px-6
+          max-w-screen-xl md:mx-auto
+          chip-scroll-container
+        `}
       >
-        {categoryList.map((cat) => {
+        {categoryList.map((cat, index) => {
           const isActive = activeCategory === cat.key;
+          const isTelugu = language === "te";
+          const label = isTelugu ? cat.te : cat.en;
+          const isLast = index === categoryList.length - 1;
+
           return (
-            <button
+            <div
               key={cat.key}
-              data-category={cat.key}
-              data-testid={`category-${cat.key}`}
-              onClick={() => onCategoryChange(cat.key)}
-              className={`
-                flex-shrink-0 px-3 py-2 text-[11px] font-bold uppercase tracking-[0.12em]
-                border-b-2 transition-all whitespace-nowrap
-                ${isActive
-                  ? "border-[#0052CC] text-[#0052CC]"
-                  : darkMode
-                    ? "border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-500"
-                    : "border-transparent text-slate-500 hover:text-slate-900 hover:border-slate-300"
-                }
-                ${language === "te" ? "font-telugu normal-case" : ""}
-              `}
+              className="flex items-stretch flex-shrink-0"
             >
-              {language === "en" ? cat.en : cat.te}
-            </button>
+              {/* Tab button */}
+              <button
+                data-category={cat.key}
+                data-testid={`category-${cat.key}`}
+                onClick={() => onCategoryChange(cat.key)}
+                className={`
+                  relative flex-shrink-0
+                  px-4 pt-[10px] pb-[9px]
+                  transition-colors duration-150
+                  whitespace-nowrap
+                  focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0052CC] focus-visible:ring-offset-1
+                  ${isTelugu
+                    ? "font-telugu normal-case text-[13px] font-semibold tracking-normal"
+                    : "text-[11px] font-bold uppercase tracking-[0.16em]"
+                  }
+                  ${isActive
+                    ? "text-[#0052CC]"
+                    : darkMode
+                      ? "text-slate-500 hover:text-slate-200"
+                      : "text-slate-500 hover:text-slate-800"
+                  }
+                `}
+              >
+                {label}
+
+                {/* Active indicator: 3px bar anchored to the bottom of the tab */}
+                <span
+                  className={`
+                    absolute bottom-0 left-0 right-0 h-[3px]
+                    transition-opacity duration-150
+                    bg-[#0052CC]
+                    ${isActive ? "opacity-100" : "opacity-0"}
+                  `}
+                />
+              </button>
+
+              {/* Desktop-only mid-dot separator between items */}
+              {!isLast && (
+                <span
+                  className={`
+                    hidden md:flex items-center
+                    select-none pointer-events-none
+                    text-[10px] px-0
+                    ${darkMode ? "text-slate-700" : "text-slate-300"}
+                  `}
+                  aria-hidden="true"
+                >
+                  ·
+                </span>
+              )}
+            </div>
           );
         })}
       </div>
+
+      {/* Bottom divider */}
+      <div
+        className={`h-px ${darkMode ? "bg-slate-800" : "bg-slate-200"}`}
+      />
     </div>
   );
 };

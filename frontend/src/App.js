@@ -27,6 +27,10 @@ import AgentsDashboard from "./pages/AgentsDashboard";
 import StartupApply from "./pages/StartupApply";
 import { VisitorCounter } from "./components/VisitorCounter";
 import { Footer } from "./components/Footer";
+import AboutPage from "./pages/AboutPage";
+import ContactPage from "./pages/ContactPage";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsOfService from "./pages/TermsOfService";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || "https://the-venture-republic-production.up.railway.app";
 export const API = `${BACKEND_URL}/api`;
@@ -243,6 +247,10 @@ function AppContent() {
             <Route path="/news/:id" element={<ArticlePage />} />
             <Route path="/agents" element={<AgentsDashboard />} />
             <Route path="/startup-apply" element={<StartupApply />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/contact" element={<ContactPage />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+            <Route path="/terms" element={<TermsOfService />} />
           </Routes>
         </main>
         <Footer />
