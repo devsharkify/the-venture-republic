@@ -61,7 +61,7 @@
     "start": "craco start",
     "build": "react-scripts build",
     "test": "craco test",
-    "postinstall": "find node_modules -mindepth 3 -maxdepth 5 -name ajv-keywords -type d -not -path 'node_modules/ajv-keywords' | xargs rm -rf 2>/dev/null; exit 0"
+    "postinstall": "rm -rf node_modules/fork-ts-checker-webpack-plugin/node_modules node_modules/babel-loader/node_modules node_modules/file-loader/node_modules 2>/dev/null; exit 0"
   },
   "browserslist": {
     "production": [
