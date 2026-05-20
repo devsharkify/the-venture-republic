@@ -41,12 +41,10 @@ export const Header = () => {
           </span>
 
           {/* Center: tagline with flanking rules — hidden on mobile */}
-          <div className="hidden md:flex items-center gap-2 flex-1 justify-center px-10">
-            <span className="flex-1 h-px bg-slate-700" />
+          <div className="hidden md:flex items-center flex-1 justify-center -translate-x-[5%]">
             <span className="text-[7.5px] font-semibold tracking-[0.18em] uppercase text-slate-400 whitespace-nowrap">
               India&rsquo;s Premier Startup Intelligence Platform
             </span>
-            <span className="flex-1 h-px bg-slate-700" />
           </div>
 
           {/* Right: dark mode toggle */}
