@@ -38,4 +38,4 @@ COPY backend/ .
 # Copy React build into the container
 COPY --from=frontend-builder /frontend/build ./frontend_build
 
-CMD uvicorn server:app --host 0.0.0.0 --port ${PORT:-8080}
+CMD ["sh", "-c", "uvicorn server:app --host 0.0.0.0 --port ${PORT:-8080}"]
