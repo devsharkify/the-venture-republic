@@ -60,7 +60,8 @@
   "scripts": {
     "start": "craco start",
     "build": "react-scripts build",
-    "test": "craco test"
+    "test": "craco test",
+    "postinstall": "rm -rf node_modules/fork-ts-checker-webpack-plugin/node_modules || true"
   },
   "browserslist": {
     "production": [
@@ -93,9 +94,6 @@
     "node": "24.x"
   },
   "overrides": {
-    "ajv": "^8",
-    "fork-ts-checker-webpack-plugin": {
-      "ajv": "^6"
-    }
+    "ajv": "^8"
   }
 }
