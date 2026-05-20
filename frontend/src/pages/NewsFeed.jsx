@@ -111,12 +111,8 @@ function HeroCard({ article, darkMode, language }) {
         </p>
 
         <div className={`flex items-center gap-2 text-[11px] ${darkMode ? "text-slate-500" : "text-slate-400"}`}>
-          <span className={language === "te" ? "font-telugu" : ""}>
-            By {article.source || "The Venture Republic"}
-          </span>
-          <span className="opacity-50">·</span>
           <Clock size={11} />
-          <span>{formatDate(article.created_at)}</span>
+          <span>{formatDate(article.published_at || article.created_at)}</span>
           <span className="opacity-50">·</span>
           <span>{readTime} min read</span>
         </div>
@@ -167,9 +163,7 @@ function CompactCard({ article, darkMode, language }) {
           {title}
         </h3>
         <div className={`flex items-center gap-1.5 text-[10px] ${darkMode ? "text-slate-500" : "text-slate-400"}`}>
-          <span>{formatDate(article.created_at)}</span>
-          <span className="opacity-50">·</span>
-          <span>{article.source || "TVR"}</span>
+          <span>{formatDate(article.published_at || article.created_at)}</span>
         </div>
       </div>
     </div>
