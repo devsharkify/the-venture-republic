@@ -40,9 +40,9 @@ export const Footer = () => {
     <footer className="mt-10 bg-[#0F172A]">
       <div className="h-[2px] bg-slate-700" />
 
-      {/* Main grid — tighter padding */}
-      <div className="max-w-screen-xl mx-auto px-6 pt-7 pb-6">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+      {/* Main grid */}
+      <div className="max-w-screen-xl mx-auto px-6 pt-4 pb-3">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
 
           {/* Column 1 — Brand */}
           <div className="col-span-2 lg:col-span-1">
