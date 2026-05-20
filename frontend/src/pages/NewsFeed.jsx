@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext, useCallback, useRef } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import axios from "axios";
 import { API, AppContext } from "../App";
 import { CategoryChips } from "../components/CategoryChips";
@@ -234,7 +234,6 @@ function SidebarLatest({ articles, darkMode, language }) {
 // ─── NewsFeed ─────────────────────────────────────────────────────────────────
 export default function NewsFeed() {
   const { language, darkMode } = useContext(AppContext);
-  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);

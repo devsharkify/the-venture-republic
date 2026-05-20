@@ -1,7 +1,6 @@
 from fastapi import APIRouter, HTTPException, Query, Depends
 from typing import List, Optional
 from datetime import datetime, timezone, timedelta
-import os
 from database import db, logger, CATEGORIES, EMERGENT_LLM_KEY
 from models import NewsArticle, NewsCreate, NewsUpdate, ScrapeRequest, ScrapeResponse, StatusCheck, StatusCheckCreate
 from helpers import prepare_for_mongo, parse_from_mongo, scrape_url, rephrase_with_ai, translate_to_telugu, translate_to_english

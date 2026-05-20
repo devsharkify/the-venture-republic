@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Query, Depends
 from typing import List, Optional
 from datetime import datetime, timezone
-from database import db, logger, CATEGORIES
+from database import db, CATEGORIES
 from models import Reporter, ReporterRegister, ReporterNews, ReporterNewsSubmit, NewsArticle
 from helpers import prepare_for_mongo, parse_from_mongo
 from auth_dep import require_admin

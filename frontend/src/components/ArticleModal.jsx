@@ -70,9 +70,6 @@ export const ArticleModal = () => {
   const summary = language === "en" ? article.summary : (article.summary_te || article.summary);
   const categoryLabel = language === "en" ? article.category_label : (article.category_label_te || article.category_label);
 
-  const seoTitle = article.seo_title || title;
-  const seoDesc = (article.seo_description || summary || "").slice(0, 155);
-
   const getTimeAgo = (dateStr) => {
     try { return formatDistanceToNow(new Date(dateStr), { addSuffix: true }); } catch { return ""; }
   };

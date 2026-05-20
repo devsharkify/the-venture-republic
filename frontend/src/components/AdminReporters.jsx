@@ -33,7 +33,7 @@ import {
 import { formatDistanceToNow } from "date-fns";
 
 export const AdminReporters = () => {
-  const { language, darkMode } = useContext(AppContext);
+  const { darkMode } = useContext(AppContext);
   
   const [reporters, setReporters] = useState([]);
   const [reporterNews, setReporterNews] = useState([]);

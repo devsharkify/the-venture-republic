@@ -176,7 +176,6 @@ async def rss_feed():
     for a in articles:
         title = a.get("seo_title") or a.get("title", "")
         desc = a.get("seo_description") or a.get("summary", "")[:300]
-        pub_date = a.get("published_at", "")
         link = f"{SITE_URL}/news/{a['id']}"
         category = a.get("category", "")
         keywords = a.get("seo_keywords", [])
@@ -742,7 +741,6 @@ Sitemap: {SITE_URL}/sitemap.xml
             lastmod_tag = f"\n    <lastmod>{lastmod[:10]}</lastmod>" if lastmod else ""
             title = (a.get("seo_title") or a.get("title", ""))[:65]
             safe_title = title.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;")
-            pub_date = a.get("published_at", "")[:10]
             cat_label = CATEGORIES.get(a.get("category", ""), {}).get("en", "News")
             article_url = f"{SITE_URL}/news/{a['id']}"
 

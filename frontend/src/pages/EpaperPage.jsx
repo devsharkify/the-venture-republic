@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext, useRef, useCallback } from "react";
 import { AppContext, API } from "../App";
 import axios from "axios";
-import { Loader2, Sun, Moon, ChevronLeft, ChevronRight, Download, Calendar, ZoomIn, ZoomOut, Share2 } from "lucide-react";
+import { Loader2, Sun, Moon, ChevronLeft, ChevronRight, Download, Calendar, Share2 } from "lucide-react";
 import { NewspaperPage } from "../components/epaper/NewspaperPage";
 
 const EpaperPage = () => {

@@ -6,7 +6,6 @@ from database import db, logger, CATEGORIES
 import uuid
 import hashlib
 import secrets
-import time as _time
 import re
 
 router = APIRouter(prefix="/api/public/v1")

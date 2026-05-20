@@ -1,6 +1,5 @@
 import { useState, useEffect, useContext } from "react";
-import { AppContext } from "../App";
-import { API } from "../App";
+import { AppContext, API } from "../App";
 import axios from "axios";
 import { Radio, Tv, X } from "lucide-react";
 

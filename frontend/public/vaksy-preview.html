@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vaksy App Preview</title>
+<style>
+:root {
+  --ink:#050505;--ink2:#222;--ink3:#555;--ink4:#888;--ink5:#ADADAD;
+  --white:#FFFFFF;--soft:#FAFAFA;--line:#ECECEC;
+  --saffron:#F25C2A;--saffronDeep:#D44A1A;--saffronSoft:#FFF7ED;
+  --green:#16A34A;--greenSoft:#F0FDF4;--red:#EF4444;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;background:#111;display:flex;align-items:center;justify-content:center;
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;}
+
+/* ── Phone shell ── */
+.wrap{display:flex;flex-direction:column;align-items:center;gap:20px;}
+.snav{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;}
+.snav button{background:#222;color:#aaa;border:1px solid #333;padding:6px 14px;
+  border-radius:20px;font-size:11px;cursor:pointer;font-weight:500;}
+.snav button.on{background:var(--saffron);color:#fff;border-color:var(--saffron);}
+.phone{width:390px;height:844px;background:var(--white);border-radius:52px;overflow:hidden;
+  position:relative;box-shadow:0 50px 120px rgba(0,0,0,.7),0 0 0 1.5px #444,inset 0 0 0 2px #1a1a1a;}
+.island{position:absolute;top:14px;left:50%;transform:translateX(-50%);
+  width:118px;height:34px;background:#000;border-radius:22px;z-index:200;}
+
+/* ── Screens ── */
+.scr{position:absolute;inset:0;display:none;flex-direction:column;background:var(--white);}
+.scr.on{display:flex;}
+.st{height:56px;flex-shrink:0;}
+.body{flex:1;overflow-y:auto;overflow-x:hidden;}
+.body::-webkit-scrollbar{display:none;}
+
+/* ── Tab bar ── */
+.bar{height:82px;background:var(--white);border-top:1px solid #E8E8E8;
+  display:flex;align-items:flex-end;padding-bottom:18px;flex-shrink:0;overflow:visible;}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;
+  cursor:pointer;color:#ADADAD;user-select:none;}
+.tab.on{color:var(--saffron);}
+.ti{width:22px;height:22px;display:flex;align-items:center;justify-content:center;}
+.tl{font-size:9.5px;font-weight:600;letter-spacing:.2px;}
+
+/* Kanoon FAB */
+.kfab{flex:1;display:flex;flex-direction:column;align-items:center;gap:0;
+  cursor:pointer;user-select:none;}
+.kfc{width:54px;height:54px;border-radius:27px;background:var(--ink);
+  display:flex;align-items:center;justify-content:center;
+  margin-top:-28px;border:3px solid var(--white);
+  box-shadow:0 4px 16px rgba(0,0,0,.22);transition:background .15s;}
+.kfab.on .kfc{background:var(--saffron);}
+.kfl{font-size:9.5px;font-weight:600;color:#ADADAD;margin-top:5px;}
+.kfab.on .kfl{color:var(--saffron);}
+
+/* ── Shield SVG helper ── */
+.mark svg{display:block;}
+
+/* ── Logo row ── */
+.logo-row{display:flex;align-items:center;gap:9px;}
+.logo-text{font-size:17px;font-weight:700;color:var(--ink);letter-spacing:-.5px;}
+.logo-dot{color:var(--saffron);}
+
+/* ── Shared ── */
+.pill{display:inline-flex;align-items:center;gap:4px;
+  padding:3px 9px;border-radius:99px;font-size:10px;font-weight:600;}
+.ps::before{content:'●';font-size:5px;}
+.p-saf{background:#FFF7ED;color:var(--saffronDeep);border:1px solid rgba(242,92,42,.3);}
+.p-grn{background:var(--greenSoft);color:var(--green);border:1px solid rgba(22,163,74,.3);}
+.p-amb{background:#FFFBEB;color:#D97706;border:1px solid rgba(217,119,6,.3);}
+.card{background:var(--white);border:1px solid var(--line);border-radius:14px;overflow:hidden;}
+
+/* ══════════ WELCOME ══════════ */
+.wlogo{padding:20px 22px 0;}
+.whead{padding:18px 22px 10px;}
+.wh1{font-size:30px;font-weight:700;color:var(--ink);letter-spacing:-.8px;line-height:1.2;}
+.whi{font-size:32px;color:var(--saffron);font-style:italic;font-family:Georgia,serif;line-height:1.2;}
+.winstr{font-size:12px;color:var(--ink5);margin-top:10px;}
+.rgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 22px 16px;}
+.rtile{border-radius:14px;padding:16px 14px;border:1px solid var(--line);background:var(--soft);
+  cursor:pointer;transition:transform .1s,border-color .1s;user-select:none;}
+.rtile:hover{border-color:#ccc;background:var(--white);}
+.rtile:active{transform:scale(.96);}
+.rt{font-size:14.5px;font-weight:700;color:var(--ink);letter-spacing:-.2px;margin-bottom:6px;}
+.rs{font-size:11.5px;color:var(--ink4);line-height:16px;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.wfoot{padding:4px 22px 16px;text-align:center;font-size:12px;color:var(--ink5);}
+.wfoot a{color:var(--ink);font-weight:600;text-decoration:none;cursor:pointer;}
+
+/* ══════════ HOME ══════════ */
+.hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;}
+.hright{display:flex;align-items:center;gap:8px;}
+.lpill{display:flex;align-items:center;gap:4px;padding:5px 9px;
+  border:1px solid var(--line);border-radius:99px;font-size:10px;font-weight:600;color:var(--ink4);}
+.ibtn{width:36px;height:36px;display:flex;align-items:center;justify-content:center;
+  position:relative;cursor:pointer;border:1px solid var(--line);border-radius:99px;}
+.bdot{position:absolute;top:5px;right:5px;width:7px;height:7px;
+  border-radius:99px;background:var(--saffron);border:2px solid #fff;}
+.sos{width:36px;height:36px;border-radius:99px;background:var(--red);
+  display:flex;align-items:center;justify-content:center;
+  font-size:9px;font-weight:700;color:#fff;cursor:pointer;letter-spacing:.5px;}
+.hero{padding:14px 20px 10px;}
+.hh{font-size:26px;font-weight:700;color:var(--ink);letter-spacing:-.7px;line-height:1.3;}
+.hhi{font-size:28px;color:var(--saffron);font-style:italic;font-family:Georgia,serif;}
+.aicard{margin:0 20px 12px;background:#FFF7ED;border:1px solid rgba(242,92,42,.35);
+  border-radius:16px;padding:14px;cursor:pointer;}
+.aitag{font-size:9px;font-weight:600;color:var(--saffron);
+  letter-spacing:1.1px;text-transform:uppercase;margin-bottom:6px;}
+.aibody{font-size:13.5px;color:var(--ink2);font-weight:500;margin-bottom:8px;}
+.aicta{font-size:12px;font-weight:700;color:var(--saffronDeep);}
+.qgrid{display:flex;flex-wrap:wrap;gap:10px;padding:0 20px 12px;}
+.qtile{width:calc(50% - 5px);padding:18px 12px;background:var(--white);
+  border:1px solid var(--line);border-radius:12px;
+  display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;}
+.ql{font-size:11px;font-weight:600;color:var(--ink);text-align:center;}
+.secrow{display:flex;justify-content:space-between;align-items:center;padding:0 20px 8px;}
+.seclbl{font-size:10px;font-weight:500;color:var(--ink5);letter-spacing:1.3px;text-transform:uppercase;}
+.seclink{font-size:11px;font-weight:500;color:var(--ink4);}
+.mrow{display:flex;align-items:center;gap:12px;padding:12px 14px;}
+.micn{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;
+  justify-content:center;flex-shrink:0;font-size:11px;font-weight:700;color:var(--ink4);}
+.mtit{font-size:13.5px;font-weight:600;color:var(--ink);flex:1;}
+
+/* ══════════ KANOON ══════════ */
+.khdr{display:flex;align-items:center;gap:10px;padding:10px 18px;border-bottom:1px solid var(--line);}
+.ktit{font-size:15px;font-weight:700;color:var(--ink);}
+.kital{color:var(--saffron);font-style:italic;font-family:Georgia,serif;}
+.kst{display:flex;align-items:center;gap:5px;margin-top:2px;}
+.kdot{width:6px;height:6px;border-radius:3px;background:#16A34A;}
+.ksub{font-size:10px;color:var(--ink4);}
+.klang{margin-left:auto;display:flex;align-items:center;gap:4px;
+  padding:4px 9px;border:1px solid var(--line);border-radius:99px;
+  font-size:10px;font-weight:700;color:var(--ink);}
+.kwelcome{padding:24px 16px 0;display:flex;flex-direction:column;align-items:center;}
+.knam{font-size:26px;font-weight:700;color:var(--ink);letter-spacing:-.7px;margin-top:18px;}
+.kq{font-size:28px;color:var(--saffron);font-style:italic;font-family:Georgia,serif;}
+.khint{font-size:13px;color:var(--ink4);text-align:center;margin-top:8px;line-height:19px;max-width:280px;}
+.ksgrid{display:flex;flex-wrap:wrap;gap:10px;width:100%;margin-top:20px;}
+.ksug{width:calc(50% - 5px);padding:13px;background:var(--white);
+  border:1px solid var(--line);border-radius:12px;cursor:pointer;}
+.kstxt{font-size:11.5px;font-weight:500;color:var(--ink);line-height:15px;}
+.kinwrap{padding:8px 14px 12px;background:var(--white);border-top:1px solid var(--line);}
+.kinrow{display:flex;align-items:center;gap:8px;background:var(--soft);
+  border:1px solid var(--line);border-radius:26px;padding:6px 6px 6px 14px;}
+.kinput{flex:1;border:none;background:transparent;font-size:14px;color:var(--ink);
+  outline:none;padding:6px 0;}
+.ksend{width:36px;height:36px;border-radius:18px;background:var(--saffron);
+  display:flex;align-items:center;justify-content:center;font-size:16px;
+  cursor:pointer;flex-shrink:0;color:#fff;font-weight:700;}
+.kmic{width:36px;height:36px;border-radius:18px;background:var(--white);
+  border:1px solid var(--line);display:flex;align-items:center;
+  justify-content:center;font-size:13px;cursor:pointer;flex-shrink:0;
+  color:var(--ink4);font-weight:600;}
+.chat{padding:12px 16px 8px;display:flex;flex-direction:column;gap:10px;}
+.mu{align-self:flex-end;max-width:80%;}
+.ma{align-self:flex-start;max-width:85%;}
+.bu{background:var(--ink);color:#fff;padding:11px 14px;border-radius:16px;
+  border-bottom-right-radius:4px;font-size:13.5px;line-height:1.4;}
+.ba{background:var(--soft);border:1px solid var(--line);color:var(--ink);
+  padding:11px 14px;border-radius:16px;border-bottom-left-radius:4px;
+  font-size:13.5px;line-height:1.4;}
+.cite{display:inline-flex;align-items:center;gap:5px;margin-top:6px;
+  padding:5px 9px;background:#FFF7ED;border:1px solid rgba(242,92,42,.3);
+  border-radius:8px;font-size:10px;color:var(--saffronDeep);font-weight:600;}
+
+/* ══════════ MATTERS ══════════ */
+.mhdr{display:flex;align-items:center;justify-content:space-between;padding:14px 22px;}
+.mtitle{font-size:21px;font-weight:700;color:var(--ink);letter-spacing:-.4px;}
+.mact{display:flex;gap:6px;}
+.micnp{width:38px;height:38px;border-radius:99px;display:flex;align-items:center;justify-content:center;cursor:pointer;border:1px solid var(--line);}
+.micnk{width:38px;height:38px;border-radius:99px;background:var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff;font-size:20px;font-weight:300;}
+.msumm{font-size:12.5px;color:var(--ink4);padding:0 22px 8px;}
+.frow{display:flex;gap:8px;padding:0 22px 10px;overflow-x:auto;}
+.frow::-webkit-scrollbar{display:none;}
+.fc{padding:6px 14px;border-radius:99px;border:1px solid var(--line);
+  background:var(--soft);font-size:11.5px;font-weight:600;color:var(--ink4);
+  cursor:pointer;white-space:nowrap;flex-shrink:0;}
+.fc.on{background:var(--ink);border-color:var(--ink);color:#fff;}
+.mlist{display:flex;flex-direction:column;gap:10px;padding:0 22px 100px;}
+.mc{display:flex;align-items:center;gap:13px;background:var(--white);
+  border:1px solid var(--line);border-radius:16px;padding:15px;cursor:pointer;}
+.mci{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;
+  justify-content:center;flex-shrink:0;font-size:11px;font-weight:700;color:var(--ink4);}
+.mct{flex:1;}
+.mctit{font-size:14px;font-weight:600;color:var(--ink);letter-spacing:-.1px;}
+.mcsub{font-size:11.5px;color:var(--ink4);margin-top:2px;}
+
+/* ══════════ VAULT ══════════ */
+.vtop{display:flex;align-items:center;justify-content:space-between;padding:14px 22px;}
+.vtit{font-size:21px;font-weight:700;color:var(--ink);}
+.vup{display:flex;align-items:center;gap:6px;background:var(--saffron);
+  border-radius:10px;padding:7px 14px;cursor:pointer;font-size:12.5px;font-weight:600;color:#fff;}
+.vsrch{display:flex;align-items:center;gap:10px;margin:0 22px 4px;height:44px;
+  background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:0 14px;}
+.vsrch input{flex:1;border:none;background:transparent;font-size:14px;color:var(--ink);outline:none;}
+.vchips{display:flex;gap:8px;padding:8px 22px 4px;overflow-x:auto;}
+.vchips::-webkit-scrollbar{display:none;}
+.vc{padding:6px 14px;border-radius:99px;background:var(--soft);border:1px solid var(--line);
+  font-size:11.5px;font-weight:600;color:var(--ink4);cursor:pointer;white-space:nowrap;}
+.vc.on{background:var(--ink);border-color:var(--ink);color:#fff;}
+.vsl{font-size:10px;letter-spacing:1.3px;font-weight:500;text-transform:uppercase;
+  color:var(--ink5);padding:12px 22px 6px;}
+.dlist{display:flex;flex-direction:column;gap:8px;padding:0 22px 100px;}
+.dc{display:flex;align-items:center;gap:12px;padding:13px;background:var(--white);
+  border:1px solid var(--line);border-radius:14px;cursor:pointer;}
+.di{width:40px;height:40px;border-radius:10px;background:var(--soft);
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:700;color:var(--saffronDeep);letter-spacing:.5px;}
+.dn{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:2px;}
+.dm{font-size:11px;color:var(--ink4);}
+.darr{color:var(--ink5);font-size:16px;flex-shrink:0;}
+
+/* ══════════ PROFILE ══════════ */
+.ptop{display:flex;align-items:center;justify-content:space-between;padding:14px 22px;}
+.ptit{font-size:21px;font-weight:700;color:var(--ink);}
+.pgear{width:40px;height:40px;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;border:1px solid var(--line);border-radius:99px;
+  font-size:13px;font-weight:600;color:var(--ink4);}
+.phero{padding:0 22px 20px;}
+.pav{width:78px;height:78px;border-radius:99px;background:var(--ink);
+  display:flex;align-items:center;justify-content:center;}
+.pname{font-size:19px;font-weight:700;color:var(--ink);margin-top:12px;letter-spacing:-.2px;}
+.pphone{font-size:13px;color:var(--ink4);margin-top:3px;}
+.planrow{display:flex;align-items:center;gap:8px;margin-top:10px;}
+.planp{background:var(--ink);border-radius:99px;padding:4px 10px;
+  font-size:9px;font-weight:600;color:#fff;letter-spacing:1.2px;}
+.upg{font-size:13px;font-weight:600;color:var(--saffron);}
+.stats{display:flex;margin-top:18px;}
+.sc{flex:1;display:flex;flex-direction:column;align-items:center;}
+.sn{font-size:22px;font-weight:700;color:var(--ink);line-height:26px;}
+.sl{font-size:9px;font-weight:500;color:var(--ink5);letter-spacing:1.2px;text-transform:uppercase;margin-top:2px;}
+.sdv{width:1px;background:var(--line);}
+.pdiv{height:1px;background:var(--line);margin:20px 22px;}
+.psl{font-size:10px;font-weight:500;color:var(--ink5);letter-spacing:1.3px;
+  text-transform:uppercase;padding:0 22px 8px;}
+.pcard{margin:0 22px 20px;border:1px solid var(--line);border-radius:14px;overflow:hidden;}
+.pr{display:flex;align-items:center;justify-content:space-between;
+  padding:14px 16px;cursor:pointer;}
+.pr:not(:last-child){border-bottom:1px solid var(--line);}
+.prl{font-size:14.5px;color:var(--ink);}
+.prr{display:flex;align-items:center;gap:8px;}
+.pltag{background:var(--line);border-radius:99px;padding:3px 8px;
+  font-size:9px;font-weight:500;color:var(--ink3);letter-spacing:1px;}
+.parr{color:var(--ink5);font-size:14px;}
+.sout{margin:0 22px;height:50px;background:var(--white);border:1px solid var(--line);
+  border-radius:14px;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:14.5px;font-weight:600;color:var(--red);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="snav">
+    <button onclick="go('welcome')"      id="b-welcome" class="on">Welcome</button>
+    <button onclick="go('home')"         id="b-home">Home</button>
+    <button onclick="go('kanoon')"       id="b-kanoon">Kanoon AI</button>
+    <button onclick="go('matters')"      id="b-matters">Matters</button>
+    <button onclick="go('vault')"        id="b-vault">Vault</button>
+    <button onclick="go('profile')"      id="b-profile">Profile</button>
+    <button onclick="go('schedule')"     id="b-schedule">Schedule</button>
+    <button onclick="go('notifs')"       id="b-notifs">Notifications</button>
+    <button onclick="go('newmatter')"    id="b-newmatter">New Matter</button>
+    <button onclick="go('findlawyer')"   id="b-findlawyer">Find Lawyer</button>
+    <button onclick="go('matterchat')"   id="b-matterchat">Matter Chat</button>
+  </div>
+
+  <div class="phone">
+    <div class="island"></div>
+
+    <!-- ════ WELCOME ════ -->
+    <div class="scr on" id="s-welcome">
+      <div class="st"></div>
+      <div class="body">
+        <div class="wlogo">
+          <div class="logo-row">
+            <div class="mark">SHIELD_SM</div>
+            <span class="logo-text">Vaksy<span class="logo-dot">.</span></span>
+          </div>
+        </div>
+        <div class="whead">
+          <div class="wh1">Your legal</div>
+          <div class="whi">companion.</div>
+          <div class="winstr">Tap a category to sign in</div>
+        </div>
+        <div class="rgrid">
+          <div class="rtile" onclick="go('home')">
+            <div class="rt">Citizen</div>
+            <div class="rs">Know your rights and get legal help in your language.</div>
+          </div>
+          <div class="rtile" onclick="go('home')">
+            <div class="rt">NRI / HNI</div>
+            <div class="rs">Cross-border matters, property and compliance support.</div>
+          </div>
+          <div class="rtile" onclick="go('home')">
+            <div class="rt">Startup</div>
+            <div class="rs">Contracts, compliance and legal ops for your business.</div>
+          </div>
+          <div class="rtile" onclick="go('home')">
+            <div class="rt">Advocate</div>
+            <div class="rs">For paneled advocates to manage clients and hearings.</div>
+          </div>
+        </div>
+        <div class="wfoot">Already have an account? <a onclick="go('home')">Sign in →</a></div>
+      </div>
+    </div>
+
+    <!-- ════ HOME ════ -->
+    <div class="scr" id="s-home">
+      <div class="st"></div>
+      <div class="body">
+        <div class="hdr">
+          <div class="logo-row">
+            <div class="mark">SHIELD_SM</div>
+            <span class="logo-text">Vaksy<span class="logo-dot">.</span></span>
+          </div>
+          <div class="hright">
+            <div class="lpill">EN</div>
+            <div class="ibtn" onclick="go('notifs')" style="cursor:pointer;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#050505" stroke-width="2" stroke-linecap="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>
+              <div class="bdot"></div>
+            </div>
+            <div class="sos" onclick="alert('SOS: Call 112?')">SOS</div>
+          </div>
+        </div>
+        <div class="hero">
+          <div class="hh">How can Vaksy help<br>
+            <span class="hhi">today</span>?
+          </div>
+        </div>
+        <div class="aicard" onclick="go('kanoon')">
+          <div class="aitag">KANOON AI · FREE</div>
+          <div class="aibody">Ask a legal question in plain language. I'll cite the law and connect you to an advocate.</div>
+          <div class="aicta">Ask a question →</div>
+        </div>
+        <div class="qgrid">
+          <div class="qtile" onclick="go('kanoon')"><div class="ql">Ask AI</div></div>
+          <div class="qtile" onclick="go('schedule')"><div class="ql">Book a Call</div></div>
+          <div class="qtile" onclick="go('vault')"><div class="ql">My Docs</div></div>
+          <div class="qtile" onclick="go('findlawyer')"><div class="ql">Find Lawyer</div></div>
+        </div>
+        <div class="secrow">
+          <div class="seclbl">Your Matters</div>
+          <div class="seclink" onclick="go('matters')" style="cursor:pointer;">All 3 ›</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;padding:0 20px 90px;">
+          <div class="card" onclick="go('matterchat')" style="cursor:pointer;">
+            <div class="mrow">
+              <div class="micn" style="background:#FFF7ED;color:#D44A1A;">HM</div>
+              <div class="mtit">Security deposit dispute</div>
+              <div class="pill ps p-saf">Active</div>
+            </div>
+          </div>
+          <div class="card" onclick="go('matterchat')" style="cursor:pointer;">
+            <div class="mrow">
+              <div class="micn" style="background:#F0FDF4;color:#16A34A;">FF</div>
+              <div class="mtit">F&amp;F settlement &amp; gratuity</div>
+              <div class="pill ps p-grn">Resolved</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="bar">
+        <div class="tab on" onclick="go('home')"><div class="tl">Home</div></div>
+        <div class="tab" onclick="go('matters')"><div class="tl">Matters</div></div>
+        <div class="kfab" onclick="go('kanoon')">
+          <div class="kfc mark">SHIELD_TAB</div>
+          <div class="kfl">Kanoon</div>
+        </div>
+        <div class="tab" onclick="go('vault')"><div class="tl">Vault</div></div>
+        <div class="tab" onclick="go('profile')"><div class="tl">Me</div></div>
+      </div>
+    </div>
+
+    <!-- ════ KANOON ════ -->
+    <div class="scr" id="s-kanoon">
+      <div class="st"></div>
+      <div class="khdr">
+        <div class="mark">SHIELD_XS</div>
+        <div>
+          <div class="ktit">Kanoon <span class="kital">AI</span></div>
+          <div class="kst"><div class="kdot"></div><div class="ksub">Trained on Indian law</div></div>
+        </div>
+        <div class="klang">EN</div>
+      </div>
+      <div class="body" id="kbody">
+        <div class="kwelcome" id="kwel">
+          <div class="mark">SHIELD_LG</div>
+          <div class="knam">Namaste,</div>
+          <div class="kq">what's on your mind?</div>
+          <div class="khint">Ask in plain language. I'll cite the law and connect you to an advocate if needed.</div>
+          <div class="ksgrid">
+            <div class="ksug" onclick="ask('Landlord won\'t return security deposit')">
+              <div class="kstxt">Landlord won't return security deposit</div>
+            </div>
+            <div class="ksug" onclick="ask('Employer delaying salary payment')">
+              <div class="kstxt">Employer delaying salary payment</div>
+            </div>
+            <div class="ksug" onclick="ask('Disputing a traffic challan')">
+              <div class="kstxt">Disputing a traffic challan</div>
+            </div>
+            <div class="ksug" onclick="ask('Seller refusing product refund')">
+              <div class="kstxt">Seller refusing product refund</div>
+            </div>
+          </div>
+        </div>
+        <div class="chat" id="chatarea" style="display:none;"></div>
+      </div>
+      <div class="kinwrap">
+        <div class="kinrow">
+          <input class="kinput" id="kinp" placeholder="Ask anything about Indian law..." onkeydown="if(event.key==='Enter')send()">
+          <div class="kmic">MIC</div>
+          <div class="ksend" onclick="send()">↑</div>
+        </div>
+      </div>
+      <div class="bar">
+        <div class="tab" onclick="go('home')"><div class="tl">Home</div></div>
+        <div class="tab" onclick="go('matters')"><div class="tl">Matters</div></div>
+        <div class="kfab on" onclick="go('kanoon')">
+          <div class="kfc mark">SHIELD_TAB</div>
+          <div class="kfl">Kanoon</div>
+        </div>
+        <div class="tab" onclick="go('vault')"><div class="tl">Vault</div></div>
+        <div class="tab" onclick="go('profile')"><div class="tl">Me</div></div>
+      </div>
+    </div>
+
+    <!-- ════ MATTERS ════ -->
+    <div class="scr" id="s-matters">
+      <div class="st"></div>
+      <div class="body">
+        <div class="mhdr">
+          <div class="mtitle">Matters</div>
+          <div class="mact">
+            <div class="micnp">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#050505" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </div>
+            <div class="micnk" onclick="go('newmatter')" style="cursor:pointer;">+</div>
+          </div>
+        </div>
+        <div class="msumm">3 total &nbsp;·&nbsp; 1 active &nbsp;·&nbsp; 1 resolved</div>
+        <div class="frow" id="frow">
+          <div class="fc on" onclick="setf(this)">All</div>
+          <div class="fc" onclick="setf(this)">Active</div>
+          <div class="fc" onclick="setf(this)">Reviewing</div>
+          <div class="fc" onclick="setf(this)">Resolved</div>
+        </div>
+        <div class="mlist">
+          <div class="mc" onclick="go('matterchat')" style="cursor:pointer;">
+            <div class="mci" style="background:#FFF7ED;color:#D44A1A;">HM</div>
+            <div class="mct">
+              <div class="mctit">Security deposit dispute</div>
+              <div class="mcsub">Your advocate · Updated 2h ago</div>
+            </div>
+            <div class="pill ps p-saf">Active</div>
+          </div>
+          <div class="mc" onclick="go('matterchat')" style="cursor:pointer;">
+            <div class="mci" style="background:#FFFBEB;color:#D97706;">FF</div>
+            <div class="mct">
+              <div class="mctit">F&amp;F Settlement Notice</div>
+              <div class="mcsub">Your advocate · Updated 1d ago</div>
+            </div>
+            <div class="pill ps p-amb">Reviewing</div>
+          </div>
+          <div class="mc" onclick="go('matterchat')" style="cursor:pointer;">
+            <div class="mci" style="background:#F0FDF4;color:#047857;">CC</div>
+            <div class="mct">
+              <div class="mctit">Consumer Complaint</div>
+              <div class="mcsub">Your advocate · Updated 3d ago</div>
+            </div>
+            <div class="pill ps p-grn">Resolved</div>
+          </div>
+        </div>
+      </div>
+      <div class="bar">
+        <div class="tab" onclick="go('home')"><div class="tl">Home</div></div>
+        <div class="tab on" onclick="go('matters')"><div class="tl">Matters</div></div>
+        <div class="kfab" onclick="go('kanoon')">
+          <div class="kfc mark">SHIELD_TAB</div>
+          <div class="kfl">Kanoon</div>
+        </div>
+        <div class="tab" onclick="go('vault')"><div class="tl">Vault</div></div>
+        <div class="tab" onclick="go('profile')"><div class="tl">Me</div></div>
+      </div>
+    </div>
+
+    <!-- ════ VAULT ════ -->
+    <div class="scr" id="s-vault">
+      <div class="st"></div>
+      <div class="body">
+        <div class="vtop">
+          <div class="vtit">Vault</div>
+          <div class="vup" onclick="alert('Document upload coming soon')">+ Upload</div>
+        </div>
+        <div class="vsrch">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ADADAD" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input placeholder="Search documents...">
+        </div>
+        <div class="vchips">
+          <div class="vc on">All</div>
+          <div class="vc">PDF</div>
+          <div class="vc">Image</div>
+          <div class="vc">Doc</div>
+          <div class="vc">Other</div>
+        </div>
+        <div class="vsl">Recent</div>
+        <div class="dlist">
+          <div class="dc">
+            <div class="di">PDF</div>
+            <div style="flex:1;">
+              <div class="dn">Rental_Agreement.pdf</div>
+              <div class="dm">PDF · 340 KB · 2 days ago</div>
+            </div>
+            <div class="darr">↓</div>
+          </div>
+          <div class="dc">
+            <div class="di">PDF</div>
+            <div style="flex:1;">
+              <div class="dn">Demand_Notice_v1.pdf</div>
+              <div class="dm">PDF · 184 KB · Today</div>
+            </div>
+            <div class="darr">↓</div>
+          </div>
+          <div class="dc">
+            <div class="di">PDF</div>
+            <div style="flex:1;">
+              <div class="dn">Salary_Slip_Apr.pdf</div>
+              <div class="dm">PDF · 96 KB · 1 week ago</div>
+            </div>
+            <div class="darr">↓</div>
+          </div>
+          <div class="dc">
+            <div class="di" style="color:#1D4ED8;">IMG</div>
+            <div style="flex:1;">
+              <div class="dn">WhatsApp_Screenshot.jpg</div>
+              <div class="dm">Image · 1.2 MB · 3 days ago</div>
+            </div>
+            <div class="darr">↓</div>
+          </div>
+        </div>
+      </div>
+      <div class="bar">
+        <div class="tab" onclick="go('home')"><div class="tl">Home</div></div>
+        <div class="tab" onclick="go('matters')"><div class="tl">Matters</div></div>
+        <div class="kfab" onclick="go('kanoon')">
+          <div class="kfc mark">SHIELD_TAB</div>
+          <div class="kfl">Kanoon</div>
+        </div>
+        <div class="tab on" onclick="go('vault')"><div class="tl">Vault</div></div>
+        <div class="tab" onclick="go('profile')"><div class="tl">Me</div></div>
+      </div>
+    </div>
+
+    <!-- ════ PROFILE ════ -->
+    <div class="scr" id="s-profile">
+      <div class="st"></div>
+      <div class="body">
+        <div class="ptop">
+          <div class="ptit">Me</div>
+          <div class="pgear" onclick="alert('Settings coming soon')">cfg</div>
+        </div>
+        <div class="phero">
+          <div class="pav"><div class="mark">SHIELD_AV</div></div>
+          <div class="pname">Vaksy User</div>
+          <div class="pphone">+91 99999 99999</div>
+          <div class="planrow">
+            <div class="planp">FREE PLAN</div>
+            <div class="upg">Upgrade</div>
+          </div>
+          <div class="stats">
+            <div class="sc"><div class="sn">3</div><div class="sl">Matters</div></div>
+            <div class="sdv"></div>
+            <div class="sc"><div class="sn">2</div><div class="sl">Drafts</div></div>
+            <div class="sdv"></div>
+            <div class="sc"><div class="sn">1</div><div class="sl">Saved</div></div>
+          </div>
+        </div>
+        <div class="pdiv"></div>
+        <div class="psl">Account</div>
+        <div class="pcard">
+          <div class="pr"><div class="prl">Language</div><div class="prr"><div class="pltag">EN</div><div class="parr">›</div></div></div>
+          <div class="pr"><div class="prl">Notifications</div><div class="parr">›</div></div>
+          <div class="pr"><div class="prl">Privacy &amp; Data</div><div class="parr">›</div></div>
+        </div>
+        <div class="psl">Legal</div>
+        <div class="pcard">
+          <div class="pr"><div class="prl">Terms of Service</div><div class="parr">›</div></div>
+          <div class="pr"><div class="prl">Privacy Policy</div><div class="parr">›</div></div>
+        </div>
+        <div class="sout" onclick="go('welcome')">Sign out</div>
+        <div style="height:90px;"></div>
+      </div>
+      <div class="bar">
+        <div class="tab" onclick="go('home')"><div class="tl">Home</div></div>
+        <div class="tab" onclick="go('matters')"><div class="tl">Matters</div></div>
+        <div class="kfab" onclick="go('kanoon')">
+          <div class="kfc mark">SHIELD_TAB</div>
+          <div class="kfl">Kanoon</div>
+        </div>
+        <div class="tab" onclick="go('vault')"><div class="tl">Vault</div></div>
+        <div class="tab on" onclick="go('profile')"><div class="tl">Me</div></div>
+      </div>
+    </div>
+
+    <!-- ════ SCHEDULE ════ -->
+    <div class="scr" id="s-schedule">
+      <div class="st"></div>
+      <div class="body">
+        <div class="hdr" style="border-bottom:1px solid var(--line);">
+          <div onclick="go('home')" style="width:38px;height:38px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;color:var(--ink);">‹</div>
+          <div class="logo-row" style="flex:1;justify-content:center;">
+            <div class="mark">SHIELD_SM</div>
+            <span class="logo-text">Vaksy<span class="logo-dot">.</span></span>
+          </div>
+          <div style="width:38px;"></div>
+        </div>
+        <div class="whead">
+          <div class="wh1">Book a Call</div>
+          <div class="whi">with an advocate.</div>
+          <div class="winstr" style="margin-top:8px;">Pick a call type, leave one-line context, confirm. Startup-experienced advocates only.</div>
+        </div>
+        <div style="padding:0 22px;font-size:10px;font-weight:600;color:var(--ink5);letter-spacing:1.4px;margin-bottom:10px;">CALL TYPE</div>
+        <div style="padding:0 22px;display:flex;flex-direction:column;gap:10px;">
+          <div onclick="this.classList.toggle('sel')" style="display:flex;align-items:center;gap:12px;padding:14px;background:#fff;border:1px solid var(--line);border-radius:14px;cursor:pointer;" class="ccard">
+            <div style="width:38px;height:38px;border-radius:10px;background:var(--soft);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--ink3);">☎</div>
+            <div style="flex:1;">
+              <div style="display:flex;align-items:center;gap:6px;"><span style="font-size:14px;font-weight:600;color:var(--ink);">Audio call</span><span style="font-size:10px;color:var(--ink5);font-family:monospace;">15 min</span></div>
+              <div style="font-size:12px;color:var(--ink4);margin-top:3px;">Quick legal query, one issue, one answer.</div>
+            </div>
+            <div style="font-size:14px;font-weight:700;color:var(--ink);">₹1,200</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:14px;background:var(--saffronSoft);border:1px solid rgba(242,92,42,.35);border-radius:14px;cursor:pointer;">
+            <div style="width:38px;height:38px;border-radius:10px;background:var(--saffron);display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;">☎</div>
+            <div style="flex:1;">
+              <div style="display:flex;align-items:center;gap:6px;"><span style="font-size:14px;font-weight:600;color:var(--saffronDeep);">Audio call</span><span style="font-size:10px;color:var(--saffronDeep);font-family:monospace;">30 min</span></div>
+              <div style="font-size:12px;color:var(--saffronDeep);margin-top:3px;">Walk through documents, discuss next steps.</div>
+            </div>
+            <div style="font-size:14px;font-weight:700;color:var(--saffronDeep);">₹2,500</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:14px;background:#fff;border:1px solid var(--line);border-radius:14px;cursor:pointer;">
+            <div style="width:38px;height:38px;border-radius:10px;background:var(--soft);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--ink3);">▶</div>
+            <div style="flex:1;">
+              <div style="display:flex;align-items:center;gap:6px;"><span style="font-size:14px;font-weight:600;color:var(--ink);">Video review</span><span style="font-size:10px;color:var(--ink5);font-family:monospace;">60 min</span></div>
+              <div style="font-size:12px;color:var(--ink4);margin-top:3px;">Full case review, strategy and document walk-through.</div>
+            </div>
+            <div style="font-size:14px;font-weight:700;color:var(--ink);">₹4,500</div>
+          </div>
+        </div>
+        <div style="padding:18px 22px 6px;font-size:10px;font-weight:600;color:var(--ink5);letter-spacing:1.4px;">TIME TODAY (IST)</div>
+        <div style="display:flex;gap:8px;padding:0 22px 4px;overflow-x:auto;">
+          <div style="padding:7px 14px;border-radius:99px;background:var(--ink);border:1px solid var(--ink);font-size:12.5px;font-weight:600;color:#fff;white-space:nowrap;cursor:pointer;flex-shrink:0;">2:00 PM</div>
+          <div style="padding:7px 14px;border-radius:99px;background:var(--soft);border:1px solid var(--line);font-size:12.5px;font-weight:600;color:var(--ink4);white-space:nowrap;cursor:pointer;flex-shrink:0;">3:00 PM</div>
+          <div style="padding:7px 14px;border-radius:99px;background:var(--soft);border:1px solid var(--line);font-size:12.5px;font-weight:600;color:var(--ink4);white-space:nowrap;cursor:pointer;flex-shrink:0;">4:00 PM</div>
+          <div style="padding:7px 14px;border-radius:99px;background:var(--soft);border:1px solid var(--line);font-size:12.5px;font-weight:600;color:var(--ink4);white-space:nowrap;cursor:pointer;flex-shrink:0;">5:00 PM</div>
+          <div style="padding:7px 14px;border-radius:99px;background:var(--soft);border:1px solid var(--line);font-size:12.5px;font-weight:600;color:var(--ink4);white-space:nowrap;cursor:pointer;flex-shrink:0;">6:00 PM</div>
+        </div>
+        <div style="margin:22px 22px 0;background:var(--soft);border:1px solid var(--line);border-radius:14px;padding:14px;">
+          <div style="font-size:14px;color:var(--ink5);">One line: what is this call about?</div>
+        </div>
+        <div onclick="alert('Request sent. We\'ll confirm your 30 min call at 2:00 PM shortly.')" style="margin:22px 22px 0;padding:16px;background:var(--saffron);border-radius:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;gap:10px;">
+          <span style="font-size:14.5px;font-weight:600;color:#fff;">Confirm 30 min at 2:00 PM — ₹2,500</span>
+        </div>
+        <div style="height:40px;"></div>
+      </div>
+    </div>
+
+    <!-- ════ NOTIFICATIONS ════ -->
+    <div class="scr" id="s-notifs">
+      <div class="st"></div>
+      <div class="body">
+        <div class="hdr" style="border-bottom:1px solid var(--line);">
+          <div onclick="go('home')" style="width:38px;height:38px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;color:var(--ink);">‹</div>
+          <div class="logo-row" style="flex:1;justify-content:center;">
+            <div class="mark">SHIELD_SM</div>
+            <span class="logo-text">Vaksy<span class="logo-dot">.</span></span>
+          </div>
+          <div style="width:38px;"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;padding:20px 22px 14px;">
+          <div>
+            <div style="font-size:24px;font-weight:700;color:var(--ink);letter-spacing:-.5px;">Notifications</div>
+            <div style="font-size:13px;color:var(--ink4);margin-top:2px;">2 unread</div>
+          </div>
+          <div style="font-size:13px;font-weight:600;color:var(--saffron);cursor:pointer;">Mark all read</div>
+        </div>
+        <div style="margin:0 22px;border:1px solid var(--line);border-radius:14px;overflow:hidden;">
+          <div style="display:flex;gap:12px;padding:14px;background:#FFFBF7;">
+            <div style="width:40px;height:40px;border-radius:10px;background:var(--saffronSoft);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px;color:var(--saffronDeep);">↑</div>
+            <div style="flex:1;">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;"><span style="font-size:14px;font-weight:600;color:var(--ink);">Demand notice ready</span><div style="width:7px;height:7px;border-radius:99px;background:var(--saffron);flex-shrink:0;"></div></div>
+              <div style="font-size:12.5px;color:var(--ink4);line-height:18px;">Your advocate uploaded Demand_Notice_v1.pdf on the security deposit matter.</div>
+              <div style="font-size:10px;color:var(--ink5);font-family:monospace;margin-top:5px;">Today, 4:18 PM</div>
+            </div>
+          </div>
+          <div style="height:1px;background:var(--line);margin-left:66px;"></div>
+          <div style="display:flex;gap:12px;padding:14px;background:#FFFBF7;">
+            <div style="width:40px;height:40px;border-radius:10px;background:var(--saffronSoft);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px;color:var(--saffronDeep);">💬</div>
+            <div style="flex:1;">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;"><span style="font-size:14px;font-weight:600;color:var(--ink);">Advocate replied</span><div style="width:7px;height:7px;border-radius:99px;background:var(--saffron);flex-shrink:0;"></div></div>
+              <div style="font-size:12.5px;color:var(--ink4);line-height:18px;">"Telangana Rent Control Act §5 requires itemized written notice. We have a strong case."</div>
+              <div style="font-size:10px;color:var(--ink5);font-family:monospace;margin-top:5px;">Today, 10:45 AM</div>
+            </div>
+          </div>
+          <div style="height:1px;background:var(--line);margin-left:66px;"></div>
+          <div style="display:flex;gap:12px;padding:14px;">
+            <div style="width:40px;height:40px;border-radius:10px;background:#D1FAE5;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px;color:var(--green);">✓</div>
+            <div style="flex:1;">
+              <div style="font-size:14px;font-weight:600;color:var(--ink);margin-bottom:3px;">Matter status updated</div>
+              <div style="font-size:12.5px;color:var(--ink4);line-height:18px;">F&amp;F Settlement Notice moved to Reviewing. Your advocate is looking at the documents.</div>
+              <div style="font-size:10px;color:var(--ink5);font-family:monospace;margin-top:5px;">Yesterday, 9:24 AM</div>
+            </div>
+          </div>
+          <div style="height:1px;background:var(--line);margin-left:66px;"></div>
+          <div style="display:flex;gap:12px;padding:14px;">
+            <div style="width:40px;height:40px;border-radius:10px;background:#DBEAFE;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px;color:#1D4ED8;">✓</div>
+            <div style="flex:1;">
+              <div style="font-size:14px;font-weight:600;color:var(--ink);margin-bottom:3px;">Consumer Complaint resolved</div>
+              <div style="font-size:12.5px;color:var(--ink4);line-height:18px;">Your consumer complaint matter has been marked as resolved.</div>
+              <div style="font-size:10px;color:var(--ink5);font-family:monospace;margin-top:5px;">3 days ago</div>
+            </div>
+          </div>
+        </div>
+        <div style="height:40px;"></div>
+      </div>
+    </div>
+
+    <!-- ════ NEW MATTER ════ -->
+    <div class="scr" id="s-newmatter">
+      <div class="st"></div>
+      <div class="body">
+        <div class="hdr" style="border-bottom:1px solid var(--line);">
+          <div onclick="go('matters')" style="width:38px;height:38px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;color:var(--ink);">‹</div>
+          <div class="logo-row" style="flex:1;justify-content:center;">
+            <div class="mark">SHIELD_SM</div>
+            <span class="logo-text">Vaksy<span class="logo-dot">.</span></span>
+          </div>
+          <div style="width:38px;"></div>
+        </div>
+        <div class="whead">
+          <div class="wh1">New Matter</div>
+          <div class="whi">what happened?</div>
+          <div class="winstr" style="margin-top:8px;">Pick the category that fits best. Your advocate takes it from there.</div>
+        </div>
+        <div style="padding:0 22px;font-size:10px;font-weight:600;color:var(--ink5);letter-spacing:1.4px;margin-bottom:10px;">CATEGORY</div>
+        <div style="padding:0 22px;display:flex;flex-direction:column;gap:8px;">
+          <div style="display:flex;align-items:center;gap:12px;padding:14px;background:var(--saffronSoft);border:1px solid rgba(242,92,42,.35);border-radius:14px;cursor:pointer;">
+            <div style="width:40px;height:40px;border-radius:10px;background:var(--saffronSoft);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px;">🏠</div>
+            <div style="flex:1;"><div style="font-size:14px;font-weight:600;color:var(--saffronDeep);">Housing &amp; Rent</div><div style="font-size:12px;color:var(--saffronDeep);margin-top:2px;">Security deposit, eviction, rental disputes.</div></div>
+            <div style="color:var(--saffron);font-size:14px;">›</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:14px;background:#fff;border:1px solid var(--line);border-radius:14px;cursor:pointer;">
+            <div style="width:40px;height:40px;border-radius:10px;background:#FFFBEB;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px;">💼</div>
+            <div style="flex:1;"><div style="font-size:14px;font-weight:600;color:var(--ink);">Employment</div><div style="font-size:12px;color:var(--ink4);margin-top:2px;">Salary delay, termination, F&amp;F settlement.</div></div>
+            <div style="color:var(--ink5);font-size:14px;">›</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:14px;background:#fff;border:1px solid var(--line);border-radius:14px;cursor:pointer;">
+            <div style="width:40px;height:40px;border-radius:10px;background:#D1FAE5;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px;">🛒</div>
+            <div style="flex:1;"><div style="font-size:14px;font-weight:600;color:var(--ink);">Consumer</div><div style="font-size:12px;color:var(--ink4);margin-top:2px;">Refund refusal, defective product, service fraud.</div></div>
+            <div style="color:var(--ink5);font-size:14px;">›</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:14px;background:#fff;border:1px solid var(--line);border-radius:14px;cursor:pointer;">
+            <div style="width:40px;height:40px;border-radius:10px;background:#DBEAFE;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px;">🚗</div>
+            <div style="flex:1;"><div style="font-size:14px;font-weight:600;color:var(--ink);">Traffic &amp; Challan</div><div style="font-size:12px;color:var(--ink4);margin-top:2px;">Dispute a challan, accident claim, licence issue.</div></div>
+            <div style="color:var(--ink5);font-size:14px;">›</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:14px;background:#fff;border:1px solid var(--line);border-radius:14px;cursor:pointer;">
+            <div style="width:40px;height:40px;border-radius:10px;background:#F3F0FF;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px;">📄</div>
+            <div style="flex:1;"><div style="font-size:14px;font-weight:600;color:var(--ink);">Contract &amp; Document</div><div style="font-size:12px;color:var(--ink4);margin-top:2px;">Draft or review an agreement, NDA, or notice.</div></div>
+            <div style="color:var(--ink5);font-size:14px;">›</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:14px;background:#fff;border:1px solid var(--line);border-radius:14px;cursor:pointer;">
+            <div style="width:40px;height:40px;border-radius:10px;background:var(--soft);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px;">⚖️</div>
+            <div style="flex:1;"><div style="font-size:14px;font-weight:600;color:var(--ink);">Other legal matter</div><div style="font-size:12px;color:var(--ink4);margin-top:2px;">Anything else — describe it in your own words.</div></div>
+            <div style="color:var(--ink5);font-size:14px;">›</div>
+          </div>
+        </div>
+        <div onclick="alert('Matter created. An advocate will be assigned shortly.')" style="margin:22px 22px 0;padding:16px;background:var(--saffron);border-radius:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;">
+          <span style="font-size:15px;font-weight:600;color:#fff;">Start Housing &amp; Rent matter →</span>
+        </div>
+        <div style="height:40px;"></div>
+      </div>
+    </div>
+
+    <!-- ════ FIND LAWYER ════ -->
+    <div class="scr" id="s-findlawyer">
+      <div class="st"></div>
+      <div class="body">
+        <div class="hdr" style="border-bottom:1px solid var(--line);">
+          <div onclick="go('home')" style="width:38px;height:38px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;color:var(--ink);">‹</div>
+          <div class="logo-row" style="flex:1;justify-content:center;">
+            <div class="mark">SHIELD_SM</div>
+            <span class="logo-text">Vaksy<span class="logo-dot">.</span></span>
+          </div>
+          <div style="width:38px;"></div>
+        </div>
+        <div class="whead">
+          <div class="wh1">Find an</div>
+          <div class="whi">Advocate.</div>
+          <div class="winstr" style="margin-top:8px;">All advocates are BCR-verified and rated by prior clients.</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;margin:0 22px 4px;height:46px;background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:0 14px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ADADAD" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <span style="font-size:14.5px;color:var(--ink5);">Search by specialty or issue...</span>
+        </div>
+        <div style="display:flex;gap:8px;padding:8px 22px 4px;overflow-x:auto;">
+          <div style="padding:6px 13px;border-radius:99px;background:var(--ink);border:1px solid var(--ink);font-size:12px;font-weight:600;color:#fff;white-space:nowrap;cursor:pointer;flex-shrink:0;">All</div>
+          <div style="padding:6px 13px;border-radius:99px;background:var(--soft);border:1px solid var(--line);font-size:12px;font-weight:600;color:var(--ink4);white-space:nowrap;cursor:pointer;flex-shrink:0;">Housing</div>
+          <div style="padding:6px 13px;border-radius:99px;background:var(--soft);border:1px solid var(--line);font-size:12px;font-weight:600;color:var(--ink4);white-space:nowrap;cursor:pointer;flex-shrink:0;">Employment</div>
+          <div style="padding:6px 13px;border-radius:99px;background:var(--soft);border:1px solid var(--line);font-size:12px;font-weight:600;color:var(--ink4);white-space:nowrap;cursor:pointer;flex-shrink:0;">Consumer</div>
+          <div style="padding:6px 13px;border-radius:99px;background:var(--soft);border:1px solid var(--line);font-size:12px;font-weight:600;color:var(--ink4);white-space:nowrap;cursor:pointer;flex-shrink:0;">Criminal</div>
+        </div>
+        <div style="font-size:13px;color:var(--ink4);padding:8px 22px 10px;">5 advocates</div>
+        <div style="display:flex;flex-direction:column;gap:10px;padding:0 22px 100px;">
+          <div style="display:flex;gap:13px;padding:15px;background:#fff;border:1px solid var(--line);border-radius:14px;cursor:pointer;">
+            <div style="position:relative;flex-shrink:0;">
+              <div style="width:46px;height:46px;border-radius:99px;background:var(--ink);display:flex;align-items:center;justify-content:center;font-style:italic;font-size:16px;color:var(--saffron);">AP</div>
+              <div style="position:absolute;bottom:1px;right:1px;width:10px;height:10px;border-radius:99px;background:var(--green);border:2px solid #fff;"></div>
+            </div>
+            <div style="flex:1;">
+              <div style="display:flex;justify-content:space-between;align-items:baseline;"><span style="font-size:14.5px;font-weight:600;color:var(--ink);">Advocate AP</span><span style="font-size:10px;color:var(--ink5);font-family:monospace;">8 yrs · 142 matters</span></div>
+              <div style="font-size:12.5px;color:var(--ink4);line-height:18px;margin-top:3px;">Tenants' rights, landlord disputes, consumer forums.</div>
+              <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;">
+                <div style="padding:3px 8px;border-radius:99px;background:var(--soft);border:1px solid var(--line);font-size:10.5px;font-weight:600;color:var(--ink3);">Housing</div>
+                <div style="padding:3px 8px;border-radius:99px;background:var(--soft);border:1px solid var(--line);font-size:10.5px;font-weight:600;color:var(--ink3);">Consumer</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:5px;margin-top:7px;font-size:10px;color:var(--ink5);font-family:monospace;">EN · HI · TE</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:13px;padding:15px;background:#fff;border:1px solid var(--line);border-radius:14px;cursor:pointer;">
+            <div style="position:relative;flex-shrink:0;">
+              <div style="width:46px;height:46px;border-radius:99px;background:var(--ink);display:flex;align-items:center;justify-content:center;font-style:italic;font-size:16px;color:var(--saffron);">RS</div>
+              <div style="position:absolute;bottom:1px;right:1px;width:10px;height:10px;border-radius:99px;background:var(--green);border:2px solid #fff;"></div>
+            </div>
+            <div style="flex:1;">
+              <div style="display:flex;justify-content:space-between;align-items:baseline;"><span style="font-size:14.5px;font-weight:600;color:var(--ink);">Advocate RS</span><span style="font-size:10px;color:var(--ink5);font-family:monospace;">11 yrs · 218 matters</span></div>
+              <div style="font-size:12.5px;color:var(--ink4);line-height:18px;margin-top:3px;">Labour law, employment contracts, startup compliance.</div>
+              <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;">
+                <div style="padding:3px 8px;border-radius:99px;background:var(--soft);border:1px solid var(--line);font-size:10.5px;font-weight:600;color:var(--ink3);">Employment</div>
+                <div style="padding:3px 8px;border-radius:99px;background:var(--soft);border:1px solid var(--line);font-size:10.5px;font-weight:600;color:var(--ink3);">Corporate</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:5px;margin-top:7px;font-size:10px;color:var(--ink5);font-family:monospace;">EN · HI</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:13px;padding:15px;background:#fff;border:1px solid var(--line);border-radius:14px;cursor:pointer;">
+            <div style="position:relative;flex-shrink:0;">
+              <div style="width:46px;height:46px;border-radius:99px;background:var(--ink);display:flex;align-items:center;justify-content:center;font-style:italic;font-size:16px;color:var(--saffron);">MK</div>
+            </div>
+            <div style="flex:1;">
+              <div style="display:flex;justify-content:space-between;align-items:baseline;"><span style="font-size:14.5px;font-weight:600;color:var(--ink);">Advocate MK</span><span style="font-size:10px;color:var(--ink5);font-family:monospace;">14 yrs · 307 matters</span></div>
+              <div style="font-size:12.5px;color:var(--ink4);line-height:18px;margin-top:3px;">Criminal defence, bail, challan disputes, BNS 2023.</div>
+              <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;">
+                <div style="padding:3px 8px;border-radius:99px;background:var(--soft);border:1px solid var(--line);font-size:10.5px;font-weight:600;color:var(--ink3);">Criminal</div>
+                <div style="padding:3px 8px;border-radius:99px;background:var(--soft);border:1px solid var(--line);font-size:10.5px;font-weight:600;color:var(--ink3);">Traffic</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:5px;margin-top:7px;font-size:10px;color:var(--ink5);font-family:monospace;">EN · TA · TE</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ MATTER CHAT ════ -->
+    <div class="scr" id="s-matterchat">
+      <div class="st"></div>
+      <div class="body" style="display:flex;flex-direction:column;height:100%;">
+        <!-- Header -->
+        <div class="hdr" style="border-bottom:1px solid var(--line);gap:10px;">
+          <div onclick="go('matters')" style="width:38px;height:38px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;color:var(--ink);">‹</div>
+          <div style="position:relative;width:34px;height:38px;display:flex;align-items:center;justify-content:center;">
+            <div class="mark">SHIELD_SM</div>
+            <div style="position:absolute;bottom:2px;right:0;width:10px;height:10px;border-radius:99px;background:var(--green);border:2px solid #fff;"></div>
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:15px;font-weight:700;color:var(--ink);letter-spacing:-0.2px;">Your advocate</div>
+            <div style="display:flex;align-items:center;gap:6px;margin-top:1px;">
+              <span style="font-family:monospace;font-size:9.5px;color:var(--ink5);">BCR/AP/2014/2847</span>
+              <span style="font-size:10px;color:var(--ink5);">·</span>
+              <span style="font-size:11px;font-weight:500;color:var(--green);">Online</span>
+            </div>
+          </div>
+          <div style="width:34px;height:34px;border-radius:99px;background:var(--soft);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;cursor:pointer;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--ink3)" stroke-width="1.8" stroke-linecap="round"><rect x="2" y="7" width="14" height="10" rx="2"/><path d="M16 10l5-3v10l-5-3"/></svg>
+          </div>
+          <div style="width:34px;height:34px;border-radius:99px;background:var(--soft);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;cursor:pointer;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--ink3)" stroke-width="1.8" stroke-linecap="round"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/></svg>
+          </div>
+        </div>
+        <!-- Context bar -->
+        <div style="display:flex;align-items:center;gap:10px;padding:9px 16px;background:#FFF7ED;border-bottom:1px solid rgba(242,92,42,0.25);">
+          <div style="width:22px;height:22px;border-radius:6px;background:#FFE4C4;display:flex;align-items:center;justify-content:center;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--saffronDeep)" stroke-width="2" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          </div>
+          <span style="flex:1;font-size:12.5px;color:var(--ink2);"><strong>Security deposit dispute</strong> · ₹45,000 · Active</span>
+        </div>
+        <!-- Messages -->
+        <div style="flex:1;overflow-y:auto;padding:12px 16px 16px;background:#fff;" id="mc-msgs">
+          <!-- Day separator -->
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+            <div style="flex:1;height:1px;background:var(--line);"></div>
+            <span style="font-family:monospace;font-size:9.5px;color:var(--ink5);letter-spacing:1.6px;">TODAY</span>
+            <div style="flex:1;height:1px;background:var(--line);"></div>
+          </div>
+          <!-- System pill -->
+          <div style="display:flex;justify-content:center;margin-bottom:14px;">
+            <div style="background:var(--soft);border:1px solid var(--line);border-radius:99px;padding:8px 14px;text-align:center;max-width:86%;">
+              <div style="font-size:12px;font-weight:500;color:var(--ink4);">Your advocate joined this matter</div>
+              <div style="font-family:monospace;font-size:9.5px;color:var(--ink5);margin-top:3px;">Today, 10:32 AM</div>
+            </div>
+          </div>
+          <!-- User bubble -->
+          <div style="display:flex;justify-content:flex-end;margin-bottom:10px;">
+            <div style="max-width:84%;">
+              <div style="background:var(--ink);border:1px solid var(--ink);border-radius:18px;border-bottom-right-radius:4px;padding:13px;">
+                <div style="font-size:14.5px;line-height:21px;color:#fff;">Hi, I shared the rental agreement and the WhatsApp screenshots from the landlord.</div>
+              </div>
+              <div style="display:flex;justify-content:flex-end;align-items:center;gap:5px;margin-top:4px;padding-right:3px;">
+                <span style="font-size:10px;color:var(--ink5);">10:34 AM</span>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2.5" stroke-linecap="round"><path d="M5 12l5 5 9-11"/></svg>
+              </div>
+            </div>
+          </div>
+          <!-- Advocate bubble -->
+          <div style="margin-bottom:10px;max-width:84%;">
+            <div style="background:var(--soft);border:1px solid var(--line);border-radius:18px;border-bottom-left-radius:4px;padding:13px;">
+              <div style="font-size:14.5px;line-height:21px;color:var(--ink);">Got it. Reviewing now. Give me 2 hours and I will revert with a draft demand notice.</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:5px;margin-top:4px;padding-left:3px;">
+              <span style="font-size:10px;color:var(--ink5);">10:38 AM</span>
+            </div>
+          </div>
+          <!-- Advocate bubble with citation -->
+          <div style="margin-bottom:10px;max-width:84%;">
+            <div style="background:var(--soft);border:1px solid var(--line);border-radius:18px;border-bottom-left-radius:4px;padding:13px;">
+              <div style="font-size:14.5px;line-height:21px;color:var(--ink);">Perfect, that strengthens our case. Telangana Rent Control Act §5 requires itemized written notice.</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;margin-top:7px;padding:6px 10px;background:#FFF7ED;border:1px solid rgba(242,92,42,0.3);border-radius:8px;max-width:fit-content;">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--saffronDeep)" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              <span style="font-family:monospace;font-size:10.5px;color:var(--saffronDeep);">Telangana Rent Control Act 1960 §5</span>
+            </div>
+            <div style="font-size:10px;color:var(--ink5);margin-top:4px;padding-left:3px;">10:45 AM</div>
+          </div>
+          <!-- sys-attach -->
+          <div style="display:flex;justify-content:center;margin-bottom:14px;">
+            <div style="background:#F0FDF4;border:1px solid rgba(4,120,87,0.2);border-radius:14px;padding:14px;text-align:center;max-width:90%;">
+              <div style="font-size:13.5px;font-weight:600;color:var(--green);">Demand notice ready</div>
+              <div style="font-family:monospace;font-size:10px;color:var(--ink4);margin-top:4px;">Demand_Notice_v1.pdf</div>
+              <div style="display:inline-flex;align-items:center;gap:6px;margin-top:10px;padding:6px 12px;background:var(--ink);border-radius:99px;cursor:pointer;">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M12 3v13M6 11l6 6 6-6M5 21h14"/></svg>
+                <span style="font-size:11px;font-weight:600;color:#fff;">Download · 184 KB</span>
+              </div>
+              <div style="font-family:monospace;font-size:9.5px;color:var(--ink5);margin-top:8px;">Today, 4:18 PM</div>
+            </div>
+          </div>
+        </div>
+        <!-- Input bar -->
+        <div style="padding:8px 14px 16px;background:#fff;border-top:1px solid var(--line);">
+          <div style="display:flex;align-items:flex-end;background:var(--soft);border:1px solid var(--line);border-radius:24px;padding:5px;padding-left:16px;">
+            <div style="flex:1;font-size:15.5px;color:var(--ink5);padding:8px 0;">Message your advocate...</div>
+            <div style="width:36px;height:36px;border-radius:99px;background:var(--ink6);display:flex;align-items:center;justify-content:center;">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ── Shield SVG snippets ──────────────────────────────────────────────────
+const SHIELD = {
+  xs: `<svg width="22" height="26" viewBox="0 0 100 115"><path d="M10,8 L62,8 L62,24 L88,24 L88,65 L50,108 L10,65 Z" fill="#0E1F44"/><path d="M18,18 L62,18 L62,32 L80,32 L80,62 L50,97 L18,62 Z" fill="#fff"/><path d="M10,60 L22,58 L22,73 L10,73 Z" fill="#F25C2A"/></svg>`,
+  sm: `<svg width="28" height="32" viewBox="0 0 100 115"><path d="M10,8 L62,8 L62,24 L88,24 L88,65 L50,108 L10,65 Z" fill="#0E1F44"/><path d="M18,18 L62,18 L62,32 L80,32 L80,62 L50,97 L18,62 Z" fill="#fff"/><path d="M10,60 L22,58 L22,73 L10,73 Z" fill="#F25C2A"/></svg>`,
+  lg: `<svg width="56" height="64" viewBox="0 0 100 115"><path d="M10,8 L62,8 L62,24 L88,24 L88,65 L50,108 L10,65 Z" fill="#0E1F44"/><path d="M18,18 L62,18 L62,32 L80,32 L80,62 L50,97 L18,62 Z" fill="#fff"/><path d="M10,60 L22,58 L22,73 L10,73 Z" fill="#F25C2A"/></svg>`,
+  tab: `<svg width="26" height="30" viewBox="0 0 100 115"><path d="M10,8 L62,8 L62,24 L88,24 L88,65 L50,108 L10,65 Z" fill="#fff"/><path d="M18,18 L62,18 L62,32 L80,32 L80,62 L50,97 L18,62 Z" fill="rgba(255,255,255,0.15)"/><path d="M10,60 L22,58 L22,73 L10,73 Z" fill="#F25C2A"/></svg>`,
+  av:  `<svg width="40" height="46" viewBox="0 0 100 115"><path d="M10,8 L62,8 L62,24 L88,24 L88,65 L50,108 L10,65 Z" fill="#F25C2A"/><path d="M18,18 L62,18 L62,32 L80,32 L80,62 L50,97 L18,62 Z" fill="#0E1F44"/></svg>`,
+};
+
+// Replace placeholders with real SVGs
+document.querySelectorAll('.mark').forEach(el => {
+  const t = el.textContent.trim();
+  if      (t === 'SHIELD_XS')  el.innerHTML = SHIELD.xs;
+  else if (t === 'SHIELD_SM')  el.innerHTML = SHIELD.sm;
+  else if (t === 'SHIELD_LG')  el.innerHTML = SHIELD.lg;
+  else if (t === 'SHIELD_TAB') el.innerHTML = SHIELD.tab;
+  else if (t === 'SHIELD_AV')  el.innerHTML = SHIELD.av;
+});
+
+// ── Screen navigation ────────────────────────────────────────────────────
+const SCRIDS = ['welcome','home','kanoon','matters','vault','profile','schedule','notifs','newmatter','findlawyer','matterchat'];
+function go(id) {
+  SCRIDS.forEach(s => {
+    document.getElementById('s-'+s).classList.toggle('on', s===id);
+    const b = document.getElementById('b-'+s);
+    if(b) b.classList.toggle('on', s===id);
+  });
+  if(id==='kanoon') document.getElementById('kinp').focus();
+}
+
+// ── Filter chips ─────────────────────────────────────────────────────────
+function setf(el) {
+  document.querySelectorAll('#frow .fc').forEach(c=>c.classList.remove('on'));
+  el.classList.add('on');
+}
+
+// ── Kanoon AI chat ───────────────────────────────────────────────────────
+const REPLIES = {
+  deposit: { text:'Under most state Rent Control Acts, your landlord must return your security deposit within 30 days of vacating, minus reasonable damages with itemized proof. If they refuse, you can file a complaint with the Rent Controller.', cite:'Telangana Rent Control Act 1960 §5' },
+  salary:  { text:'Delayed salary is a labour law violation. Your remedies depend on your role. How long delayed and how much is pending?', cite:'Code on Wages 2019 §17' },
+  challan: { text:'You can contest a traffic challan within 60 days at the nearest Traffic Court. Bring the challan copy, RC, DL, and insurance. You may also raise a dispute via the Parivahan portal.', cite:'Motor Vehicles Act 1988 §206' },
+  refund:  { text:'A seller is legally required to issue a refund for defective goods. File a complaint with the National Consumer Helpline (1800-11-4000) or the Consumer Forum.', cite:'Consumer Protection Act 2019 §19' },
+  def:     { text:'I can help. Tell me a bit more — what happened, when, and what outcome are you hoping for?', cite:null },
+};
+function getReply(t) {
+  t = t.toLowerCase();
+  if(t.includes('deposit')||t.includes('landlord')) return REPLIES.deposit;
+  if(t.includes('salary')||t.includes('employer'))  return REPLIES.salary;
+  if(t.includes('challan')||t.includes('traffic'))  return REPLIES.challan;
+  if(t.includes('refund')||t.includes('seller'))    return REPLIES.refund;
+  return REPLIES.def;
+}
+function ask(text) {
+  document.getElementById('kwel').style.display='none';
+  const ca = document.getElementById('chatarea');
+  ca.style.display='flex';
+  addMsg(text,'user');
+  setTimeout(()=>{ const r=getReply(text); addMsg(r.text,'ai',r.cite); },1200);
+  go('kanoon');
+}
+function send() {
+  const inp=document.getElementById('kinp');
+  const t=inp.value.trim(); if(!t) return;
+  inp.value=''; ask(t);
+}
+function addMsg(text,from,cite) {
+  const ca=document.getElementById('chatarea');
+  const w=document.createElement('div'); w.className=from==='user'?'mu':'ma';
+  const b=document.createElement('div'); b.className=from==='user'?'bu':'ba';
+  b.textContent=text; w.appendChild(b);
+  if(cite){ const c=document.createElement('div'); c.className='cite'; c.textContent='§ '+cite; w.appendChild(c); }
+  ca.appendChild(w);
+  const kb=document.getElementById('kbody');
+  setTimeout(()=>kb.scrollTop=kb.scrollHeight,50);
+}
+</script>
+</body>
+</html>
