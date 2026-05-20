@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from starlette.middleware.cors import CORSMiddleware
 from starlette.middleware.gzip import GZipMiddleware
 from pathlib import Path
@@ -66,10 +67,24 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Static files
+# Static files — uploads
 uploads_dir = ROOT_DIR / "uploads"
 uploads_dir.mkdir(exist_ok=True)
 app.mount("/uploads", StaticFiles(directory=str(uploads_dir)), name="uploads")
+
+# Serve React frontend build (if present)
+frontend_build = ROOT_DIR / "frontend_build"
+if frontend_build.exists():
+    # Serve bundled JS/CSS at /static/*
+    app.mount("/static", StaticFiles(directory=str(frontend_build / "static")), name="react-static")
+
+    # Catch-all: serve exact file if it exists, else index.html (React Router)
+    @app.get("/{full_path:path}")
+    async def serve_spa(full_path: str):
+        file_path = frontend_build / full_path
+        if file_path.is_file():
+            return FileResponse(str(file_path))
+        return FileResponse(str(frontend_build / "index.html"))
 
 # Startup: launch scraper background task + generate SEO files + create indexes
 @app.on_event("startup")
