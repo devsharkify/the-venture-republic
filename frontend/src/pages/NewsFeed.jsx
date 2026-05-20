@@ -85,7 +85,7 @@ function HeroCard({ article, darkMode, language }) {
 
         {/* Category badge bottom-left */}
         {categoryLabel && (
-          <span className={`absolute bottom-3 left-3 bg-[#0052CC] text-white text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded ${language === "te" ? "font-telugu normal-case" : ""}`}>
+          <span className={`absolute bottom-3 left-3 bg-[#0F172A] text-white text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded ${language === "te" ? "font-telugu normal-case" : ""}`}>
             {categoryLabel}
           </span>
         )}
@@ -153,7 +153,7 @@ function CompactCard({ article, darkMode, language }) {
       {/* Text */}
       <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
         {categoryLabel && (
-          <span className={`text-[9px] font-bold uppercase tracking-wider text-[#0052CC] mb-1 block ${language === "te" ? "font-telugu normal-case" : ""}`}>
+          <span className={`text-[9px] font-bold uppercase tracking-wider text-[#0F172A] mb-1 block ${language === "te" ? "font-telugu normal-case" : ""}`}>
             {categoryLabel}
           </span>
         )}
@@ -179,7 +179,7 @@ function SidebarLatest({ articles, darkMode, language }) {
   return (
     <div>
       {/* Heading with blue bottom-border */}
-      <div className="border-b-2 border-[#0052CC] mb-4">
+      <div className="border-b-2 border-[#0F172A] mb-4">
         <h2 className={`text-[11px] font-black uppercase tracking-[0.2em] pb-2 ${
           darkMode ? "text-slate-200" : "text-slate-900"
         }`}>
@@ -367,10 +367,10 @@ export default function NewsFeed() {
       <div className={`px-4 pt-3 pb-2 ${darkMode ? "bg-[#0A0F1C]" : "bg-white"}`}>
         <div className={`relative flex items-center rounded-lg border transition-all ${
           isSearching
-            ? darkMode ? "border-[#0052CC] bg-[#111827]" : "border-[#0052CC] bg-white shadow-sm"
+            ? darkMode ? "border-[#0F172A] bg-[#111827]" : "border-[#0F172A] bg-white shadow-sm"
             : darkMode ? "border-slate-700 bg-[#111827]" : "border-slate-200 bg-white"
         }`}>
-          <Search size={16} className={`ml-3.5 flex-shrink-0 ${isSearching ? "text-[#0052CC]" : darkMode ? "text-slate-500" : "text-slate-400"}`} />
+          <Search size={16} className={`ml-3.5 flex-shrink-0 ${isSearching ? "text-[#0F172A]" : darkMode ? "text-slate-500" : "text-slate-400"}`} />
           <input
             data-testid="search-input"
             type="text"
@@ -413,7 +413,7 @@ export default function NewsFeed() {
       {/* Loading */}
       {loading && (
         <div className="flex flex-col items-center justify-center py-24">
-          <Loader2 size={36} className="animate-spin text-[#0052CC] mb-4" />
+          <Loader2 size={36} className="animate-spin text-[#0F172A] mb-4" />
           <p className={`text-sm ${darkMode ? "text-slate-400" : "text-slate-500"} ${language === "te" ? "font-telugu" : ""}`}>
             {language === "en" ? "Loading news..." : "వార్తలు లోడ్ అవుతున్నాయి..."}
           </p>
@@ -467,7 +467,7 @@ export default function NewsFeed() {
 
           {/* ── Sort / filter bar ── */}
           {!isSearching && (
-            <div className="flex items-center justify-between border-t-2 border-[#0052CC] pt-3 mb-5">
+            <div className="flex items-center justify-between border-t-2 border-[#0F172A] pt-3 mb-5">
               <h2 className={`text-xs font-black uppercase tracking-[0.2em] ${darkMode ? "text-slate-400" : "text-slate-400"}`}>
                 {activeCategory === "all"
                   ? (language === "en" ? "Latest News" : "తాజా వార్తలు")
@@ -543,7 +543,7 @@ export default function NewsFeed() {
                 data-testid="load-more-btn"
                 onClick={handleLoadMore}
                 disabled={loadingMore}
-                className="bg-[#0052CC] hover:bg-[#003E9E] text-white px-8 py-2.5 rounded-lg font-semibold text-sm transition-all active:scale-95"
+                className="bg-[#0F172A] hover:bg-[#003E9E] text-white px-8 py-2.5 rounded-lg font-semibold text-sm transition-all active:scale-95"
               >
                 {loadingMore ? (
                   <>

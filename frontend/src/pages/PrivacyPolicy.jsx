@@ -2,7 +2,7 @@ import { useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AppContext } from "../App";
 
-const BRAND = "#0052CC";
+const BRAND = "#0F172A";
 
 function Section({ title, children, darkMode }) {
   return (
@@ -63,7 +63,7 @@ export default function PrivacyPolicy() {
 
         {/* Breadcrumb */}
         <nav className="flex items-center gap-2 text-[13px] mb-8" aria-label="Breadcrumb">
-          <Link to="/" className={`hover:underline ${darkMode ? "text-blue-400" : "text-[#0052CC]"}`}>
+          <Link to="/" className={`hover:underline ${darkMode ? "text-blue-400" : "text-[#0F172A]"}`}>
             Home
           </Link>
           <span className={darkMode ? "text-slate-500" : "text-slate-400"}>/</span>

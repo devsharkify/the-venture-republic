@@ -38,8 +38,8 @@ export const Footer = () => {
 
   return (
     <footer className="mt-16 bg-[#0F172A]">
-      {/* 2px brand accent line at top */}
-      <div className="h-[2px] bg-[#0052CC]" />
+      {/* 2px accent line at top */}
+      <div className="h-[2px] bg-slate-700" />
 
       {/* Main grid */}
       <div className="max-w-screen-xl mx-auto px-6 pt-12 pb-10">
@@ -50,7 +50,7 @@ export const Footer = () => {
             <span className="font-serif-display text-[24px] font-black tracking-tight leading-none text-white">
               The Venture Republic
             </span>
-            <div className="mt-3 w-8 h-[2px] bg-[#0052CC]" />
+            <div className="mt-3 w-8 h-[2px] bg-slate-600" />
             <p className="text-[12px] leading-relaxed mt-4 text-slate-400">
               India's Premier Startup Intelligence Platform — delivering real-time funding news, founder stories, and venture insights.
             </p>

@@ -158,7 +158,7 @@ export const Header = () => {
       </div>
 
       {/* ── Layer 3: Bottom accent border ── */}
-      <div className="border-b-2 border-[#0052CC]" />
+      <div className="border-b-2 border-[#0F172A]" />
     </header>
   );
 };

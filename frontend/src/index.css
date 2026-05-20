@@ -5,7 +5,7 @@
 @tailwind utilities;
 
 :root {
-  --primary-blue: #0052CC;
+  --primary-blue: #0F172A;
   --primary-navy: #0A0F1C;
   --urgent-red: #DC2626;
   --bg-light: #F8F9FA;
@@ -162,7 +162,7 @@ body {
 
 /* Blue theme button */
 .btn-primary {
-  @apply bg-[#0052CC] text-white px-4 py-2 rounded-lg font-medium;
+  @apply bg-[#0F172A] text-white px-4 py-2 rounded-lg font-medium;
   transition: background-color 0.2s, transform 0.1s;
 }
 

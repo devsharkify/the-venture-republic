@@ -49,7 +49,7 @@ function SidebarArticleCard({ article, darkMode, onClick }) {
       </div>
       <div className="flex-1 min-w-0">
         {catLabel && (
-          <span className="text-[9px] font-bold uppercase tracking-wider text-[#0052CC] block mb-0.5">{catLabel}</span>
+          <span className="text-[9px] font-bold uppercase tracking-wider text-[#0F172A] block mb-0.5">{catLabel}</span>
         )}
         <p className={`text-[12px] font-semibold leading-snug line-clamp-2 ${
           darkMode ? "text-slate-200" : "text-slate-800"
@@ -128,14 +128,14 @@ export default function ArticlePage() {
 
   if (loading) return (
     <div className={`min-h-screen flex items-center justify-center ${darkMode ? "bg-slate-900" : "bg-[#F8FAFC]"}`}>
-      <div className="animate-spin w-8 h-8 border-2 border-[#0052CC] border-t-transparent rounded-full" />
+      <div className="animate-spin w-8 h-8 border-2 border-[#0F172A] border-t-transparent rounded-full" />
     </div>
   );
 
   if (!article) return (
     <div className={`min-h-screen flex flex-col items-center justify-center gap-4 ${darkMode ? "bg-slate-900 text-white" : "bg-[#F8FAFC]"}`}>
       <p>Article not found</p>
-      <button onClick={() => navigate("/")} className="text-[#0052CC]">Go Home</button>
+      <button onClick={() => navigate("/")} className="text-[#0F172A]">Go Home</button>
     </div>
   );
 
@@ -160,7 +160,7 @@ export default function ArticlePage() {
         {/* ── LEFT SIDEBAR: Related Articles ── */}
         <aside className="hidden lg:block">
           <div className={`sticky top-20 rounded-xl p-4 ${darkMode ? "bg-[#111827] border border-slate-800" : "bg-white border border-slate-200"}`}>
-            <h3 className={`text-[10px] font-black uppercase tracking-[0.18em] pb-2 mb-3 border-b-2 border-[#0052CC] ${darkMode ? "text-slate-300" : "text-slate-700"}`}>
+            <h3 className={`text-[10px] font-black uppercase tracking-[0.18em] pb-2 mb-3 border-b-2 border-[#0F172A] ${darkMode ? "text-slate-300" : "text-slate-700"}`}>
               Related Stories
             </h3>
             <div className="flex flex-col gap-3">
@@ -182,7 +182,7 @@ export default function ArticlePage() {
         <article className="min-w-0">
           {/* Category + date */}
           <div className="flex items-center gap-2 mb-3">
-            <span className="px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-[#0052CC] text-white rounded">
+            <span className="px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-[#0F172A] text-white rounded">
               {category}
             </span>
             {publishedTime && (
@@ -218,7 +218,7 @@ export default function ArticlePage() {
           {/* Mobile: show related articles below body */}
           {relatedArticles.length > 0 && (
             <div className="lg:hidden mt-8">
-              <h3 className={`text-[10px] font-black uppercase tracking-[0.18em] pb-2 mb-3 border-b-2 border-[#0052CC] ${darkMode ? "text-slate-300" : "text-slate-700"}`}>
+              <h3 className={`text-[10px] font-black uppercase tracking-[0.18em] pb-2 mb-3 border-b-2 border-[#0F172A] ${darkMode ? "text-slate-300" : "text-slate-700"}`}>
                 Related Stories
               </h3>
               <div className="flex flex-col gap-3">
@@ -233,7 +233,7 @@ export default function ArticlePage() {
         {/* ── RIGHT SIDEBAR: Latest News ── */}
         <aside className="hidden lg:block">
           <div className={`sticky top-20 rounded-xl p-4 ${darkMode ? "bg-[#111827] border border-slate-800" : "bg-white border border-slate-200"}`}>
-            <h3 className={`text-[10px] font-black uppercase tracking-[0.18em] pb-2 mb-3 border-b-2 border-[#0052CC] ${darkMode ? "text-slate-300" : "text-slate-700"}`}>
+            <h3 className={`text-[10px] font-black uppercase tracking-[0.18em] pb-2 mb-3 border-b-2 border-[#0F172A] ${darkMode ? "text-slate-300" : "text-slate-700"}`}>
               Latest News
             </h3>
             <div className="flex flex-col gap-3">

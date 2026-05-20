@@ -104,7 +104,7 @@ export const NewsCard = ({ article, index = 0, articlesList = [] }) => {
 
         {/* Category pill — bottom-left */}
         {categoryLabel && (
-          <span className="absolute bottom-2 left-2 bg-[#0052CC] text-white text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded pointer-events-none">
+          <span className="absolute bottom-2 left-2 bg-[#0F172A] text-white text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded pointer-events-none">
             {categoryLabel}
           </span>
         )}
@@ -121,21 +121,21 @@ export const NewsCard = ({ article, index = 0, articlesList = [] }) => {
           {isAdmin && (
             <button
               onClick={(e) => { e.stopPropagation(); navigate(`/admin?edit=${article.id}`); }}
-              className="w-7 h-7 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-[#0052CC] transition-colors"
+              className="w-7 h-7 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-[#0F172A] transition-colors"
             >
               <Pencil size={12} />
             </button>
           )}
           <button
             onClick={handleShare}
-            className="w-7 h-7 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-[#0052CC] transition-colors"
+            className="w-7 h-7 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-[#0F172A] transition-colors"
           >
             <Share2 size={12} />
           </button>
           <button
             onClick={(e) => { e.stopPropagation(); saveArticle(article); }}
             className={`w-7 h-7 rounded-full flex items-center justify-center transition-all ${
-              isSaved ? "bg-[#0052CC] text-white" : "bg-black/50 text-white hover:bg-[#0052CC]"
+              isSaved ? "bg-[#0F172A] text-white" : "bg-black/50 text-white hover:bg-[#0F172A]"
             }`}
           >
             {isSaved ? <BookmarkCheck size={13} /> : <Bookmark size={13} />}

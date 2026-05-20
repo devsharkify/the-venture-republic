@@ -37,7 +37,7 @@ export const CategoryChips = ({ activeCategory, onCategoryChange }) => {
       data-testid="category-chips"
     >
       {/* 2px brand-blue rule across the top of the nav strip */}
-      <div className="h-[2px] bg-[#0052CC]" />
+      <div className="h-[2px] bg-[#0F172A]" />
 
       {/* Scrollable tab row */}
       <div
@@ -70,13 +70,13 @@ export const CategoryChips = ({ activeCategory, onCategoryChange }) => {
                   px-4 pt-[10px] pb-[9px]
                   transition-colors duration-150
                   whitespace-nowrap
-                  focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0052CC] focus-visible:ring-offset-1
+                  focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0F172A] focus-visible:ring-offset-1
                   ${isTelugu
                     ? "font-telugu normal-case text-[13px] font-semibold tracking-normal"
                     : "text-[11px] font-bold uppercase tracking-[0.16em]"
                   }
                   ${isActive
-                    ? "text-[#0052CC]"
+                    ? "text-[#0F172A]"
                     : darkMode
                       ? "text-slate-500 hover:text-slate-200"
                       : "text-slate-500 hover:text-slate-800"
@@ -90,7 +90,7 @@ export const CategoryChips = ({ activeCategory, onCategoryChange }) => {
                   className={`
                     absolute bottom-0 left-0 right-0 h-[3px]
                     transition-opacity duration-150
-                    bg-[#0052CC]
+                    bg-[#0F172A]
                     ${isActive ? "opacity-100" : "opacity-0"}
                   `}
                 />
