@@ -2,9 +2,9 @@ import { useState, useEffect, useContext, useCallback } from "react";
 import axios from "axios";
 import { API, AppContext } from "../App";
 import { toast } from "sonner";
-import { 
-  Plus, Trash2, Edit2, Pin, PinOff, Link2, Loader2, 
-  RefreshCw, CheckCircle, ArrowLeft, Globe, Video, Users, BarChart3, Radio, Tv, Bot, Rocket
+import {
+  Plus, Trash2, Edit2, Pin, PinOff, Link2, Loader2,
+  RefreshCw, CheckCircle, ArrowLeft, Globe, Video, Users, BarChart3, Bot, Rocket
 } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "../components/ui/button";
@@ -62,16 +62,6 @@ export default function AdminPanel() {
   const [scraperStatus, setScraperStatus] = useState(null);
   const [triggeringScraper, setTriggeringScraper] = useState(false);
   
-  // Live TV state
-  const [liveChannels, setLiveChannels] = useState([]);
-  const [newChannel, setNewChannel] = useState({ name: "", youtube_url: "" });
-  const [addingChannel, setAddingChannel] = useState(false);
-  
-  // Shorts state
-  const [shortsList, setShortsList] = useState([]);
-  const [newShort, setNewShort] = useState({ title: "", youtube_url: "" });
-  const [addingShort, setAddingShort] = useState(false);
-  
   // Form state
   const [formData, setFormData] = useState({
     title: "",
@@ -121,8 +111,6 @@ export default function AdminPanel() {
   useEffect(() => {
     fetchArticles();
     axios.get(`${API}/scraper/status`).then(r => setScraperStatus(r.data)).catch(() => {});
-    axios.get(`${API}/live-tv`).then(r => setLiveChannels(r.data)).catch(() => {});
-    axios.get(`${API}/shorts`).then(r => setShortsList(r.data)).catch(() => {});
   }, [fetchArticles]);
 
   // Auto-open edit modal when ?edit={id} param is present (admin clicks Pencil on a news card)
@@ -157,56 +145,6 @@ export default function AdminPanel() {
     } finally {
       setTriggeringScraper(false);
     }
-  };
-
-  const handleAddChannel = async () => {
-    if (!newChannel.name || !newChannel.youtube_url) {
-      toast.error("Channel name and YouTube URL are required");
-      return;
-    }
-    try {
-      setAddingChannel(true);
-      await axios.post(`${API}/live-tv`, newChannel);
-      toast.success("Live channel added!");
-      setNewChannel({ name: "", youtube_url: "" });
-      const r = await axios.get(`${API}/live-tv`);
-      setLiveChannels(r.data);
-    } catch {
-      toast.error("Failed to add channel");
-    } finally {
-      setAddingChannel(false);
-    }
-  };
-
-  const handleDeleteChannel = async (id) => {
-    try {
-      await axios.delete(`${API}/live-tv/${id}`);
-      setLiveChannels(prev => prev.filter(c => c.id !== id));
-      toast.success("Channel removed");
-    } catch {
-      toast.error("Failed to remove channel");
-    }
-  };
-
-  const handleAddShort = async () => {
-    if (!newShort.youtube_url) { toast.error("YouTube URL required"); return; }
-    try {
-      setAddingShort(true);
-      await axios.post(`${API}/shorts`, newShort);
-      toast.success("Short added!");
-      setNewShort({ title: "", youtube_url: "" });
-      const r = await axios.get(`${API}/shorts`);
-      setShortsList(r.data);
-    } catch { toast.error("Failed to add short"); }
-    finally { setAddingShort(false); }
-  };
-
-  const handleDeleteShort = async (id) => {
-    try {
-      await axios.delete(`${API}/shorts/${id}`);
-      setShortsList(prev => prev.filter(s => s.id !== id));
-      toast.success("Short removed");
-    } catch { toast.error("Failed to remove"); }
   };
 
   const resetForm = () => {
@@ -458,7 +396,7 @@ export default function AdminPanel() {
       <div className="max-w-7xl mx-auto px-4 py-6">
         {/* Main Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-6 mb-6">
+          <TabsList className="grid w-full grid-cols-4 mb-6">
             <TabsTrigger value="news" data-testid="admin-news-tab">
               {language === "en" ? "News" : "వార్తలు"}
             </TabsTrigger>
@@ -469,14 +407,6 @@ export default function AdminPanel() {
             <TabsTrigger value="startups" data-testid="admin-startups-tab">
               <Rocket size={16} className="mr-1" />
               Startups
-            </TabsTrigger>
-            <TabsTrigger value="livetv" data-testid="admin-livetv-tab">
-              <Tv size={16} className="mr-1" />
-              Live TV
-            </TabsTrigger>
-            <TabsTrigger value="shorts" data-testid="admin-shorts-tab">
-              <Video size={16} className="mr-1" />
-              Shorts
             </TabsTrigger>
             <TabsTrigger value="apikeys" data-testid="admin-apikeys-tab">
               <Link2 size={16} className="mr-1" />
@@ -490,145 +420,6 @@ export default function AdminPanel() {
 
           <TabsContent value="startups">
             <AdminStartupApplications />
-          </TabsContent>
-
-          {/* Live TV Management */}
-          <TabsContent value="livetv">
-            <div className={`rounded-lg border p-6 ${darkMode ? "bg-slate-800 border-slate-700" : "bg-white border-slate-200"}`}>
-              <h2 className={`text-lg font-semibold mb-4 ${darkMode ? "text-white" : "text-slate-900"}`}>
-                <Tv size={20} className="inline mr-2" /> Live TV Channels
-              </h2>
-
-              {/* Add New Channel */}
-              <div className={`mb-6 p-4 rounded-lg border ${darkMode ? "bg-slate-900 border-slate-600" : "bg-orange-50 border-orange-200"}`}>
-                <h3 className={`text-sm font-semibold mb-3 ${darkMode ? "text-slate-200" : "text-slate-700"}`}>
-                  Add YouTube Live Channel
-                </h3>
-                <div className="flex gap-2 flex-wrap">
-                  <Input
-                    data-testid="channel-name-input"
-                    value={newChannel.name}
-                    onChange={(e) => setNewChannel(p => ({ ...p, name: e.target.value }))}
-                    placeholder="Channel Name (e.g. TV9 Telugu)"
-                    className={`flex-1 min-w-[200px] ${darkMode ? "bg-slate-700 border-slate-600 text-white" : ""}`}
-                  />
-                  <Input
-                    data-testid="channel-url-input"
-                    value={newChannel.youtube_url}
-                    onChange={(e) => setNewChannel(p => ({ ...p, youtube_url: e.target.value }))}
-                    placeholder="YouTube Live URL"
-                    className={`flex-[2] min-w-[250px] ${darkMode ? "bg-slate-700 border-slate-600 text-white" : ""}`}
-                  />
-                  <Button
-                    data-testid="add-channel-btn"
-                    onClick={handleAddChannel}
-                    disabled={addingChannel}
-                    className="bg-orange-500 hover:bg-orange-600"
-                  >
-                    {addingChannel ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} className="mr-1" />}
-                    Add
-                  </Button>
-                </div>
-              </div>
-
-              {/* Channels List */}
-              {liveChannels.length === 0 ? (
-                <div className="text-center py-10">
-                  <Radio size={40} className={darkMode ? "text-slate-600 mx-auto mb-3" : "text-slate-400 mx-auto mb-3"} />
-                  <p className={darkMode ? "text-slate-400" : "text-slate-500"}>No live channels added yet</p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {liveChannels.map((ch) => (
-                    <div key={ch.id} className={`flex items-center gap-4 p-3 rounded-lg border ${darkMode ? "bg-slate-900 border-slate-600" : "bg-white border-slate-200"}`}>
-                      <img
-                        src={ch.youtube_id ? `https://img.youtube.com/vi/${ch.youtube_id}/default.jpg` : ""}
-                        alt=""
-                        className="w-16 h-12 object-cover rounded"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <p className={`font-medium truncate ${darkMode ? "text-white" : "text-slate-900"}`}>{ch.name}</p>
-                        <p className={`text-xs truncate ${darkMode ? "text-slate-400" : "text-slate-500"}`}>{ch.youtube_url}</p>
-                      </div>
-                      <div className="flex items-center gap-1 px-2 py-0.5 bg-red-600 rounded text-white text-xs font-bold">
-                        <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" /> LIVE
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        data-testid={`delete-channel-${ch.id}`}
-                        onClick={() => handleDeleteChannel(ch.id)}
-                        className="text-red-500 hover:text-red-600 hover:bg-red-50"
-                      >
-                        <Trash2 size={16} />
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </TabsContent>
-
-          {/* Shorts Management */}
-          <TabsContent value="shorts">
-            <div className={`rounded-lg border p-6 ${darkMode ? "bg-slate-800 border-slate-700" : "bg-white border-slate-200"}`}>
-              <h2 className={`text-lg font-semibold mb-4 ${darkMode ? "text-white" : "text-slate-900"}`}>
-                <Video size={20} className="inline mr-2" /> YouTube Shorts ({shortsList.length})
-              </h2>
-
-              <div className={`mb-6 p-4 rounded-lg border ${darkMode ? "bg-slate-900 border-slate-600" : "bg-orange-50 border-orange-200"}`}>
-                <h3 className={`text-sm font-semibold mb-3 ${darkMode ? "text-slate-200" : "text-slate-700"}`}>
-                  Add Venture Republic Short
-                </h3>
-                <div className="flex gap-2 flex-wrap">
-                  <Input
-                    data-testid="short-title-input"
-                    value={newShort.title}
-                    onChange={(e) => setNewShort(p => ({ ...p, title: e.target.value }))}
-                    placeholder="Title (optional)"
-                    className={`flex-1 min-w-[150px] ${darkMode ? "bg-slate-700 border-slate-600 text-white" : ""}`}
-                  />
-                  <Input
-                    data-testid="short-url-input"
-                    value={newShort.youtube_url}
-                    onChange={(e) => setNewShort(p => ({ ...p, youtube_url: e.target.value }))}
-                    placeholder="YouTube Shorts URL"
-                    className={`flex-[2] min-w-[250px] ${darkMode ? "bg-slate-700 border-slate-600 text-white" : ""}`}
-                  />
-                  <Button data-testid="add-short-btn" onClick={handleAddShort} disabled={addingShort} className="bg-orange-500 hover:bg-orange-600">
-                    {addingShort ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} className="mr-1" />}
-                    Add
-                  </Button>
-                </div>
-              </div>
-
-              {shortsList.length === 0 ? (
-                <div className="text-center py-10">
-                  <Video size={40} className={darkMode ? "text-slate-600 mx-auto mb-3" : "text-slate-400 mx-auto mb-3"} />
-                  <p className={darkMode ? "text-slate-400" : "text-slate-500"}>No shorts added yet</p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-                  {shortsList.map((s) => (
-                    <div key={s.id} className={`rounded-xl overflow-hidden border ${darkMode ? "bg-slate-900 border-slate-600" : "bg-white border-slate-200"}`}>
-                      <div className="relative aspect-[9/16]">
-                        <img
-                          src={`https://img.youtube.com/vi/${s.youtube_id}/hqdefault.jpg`}
-                          alt={s.title}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      <div className="p-2 flex items-center justify-between">
-                        <p className={`text-xs font-medium truncate flex-1 ${darkMode ? "text-white" : "text-slate-800"}`}>{s.title}</p>
-                        <button onClick={() => handleDeleteShort(s.id)} className="text-red-500 hover:text-red-600 ml-2 shrink-0">
-                          <Trash2 size={14} />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
           </TabsContent>
 
           <TabsContent value="news">

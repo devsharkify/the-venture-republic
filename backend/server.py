@@ -14,7 +14,6 @@ from routes.news import router as news_router
 from routes.upload import router as upload_router
 from routes.reporter import router as reporter_router
 from routes.analytics import router as analytics_router
-from routes.media import router as media_router
 from routes.epaper import router as epaper_router
 from routes.scraper import router as scraper_router, scraper_loop
 from routes.agents import router as agents_router, run_agents_after_scrape
@@ -24,7 +23,6 @@ from routes.tech_agent import router as tech_router, performance_middleware
 from routes.seo_engine import router as seo_engine_router
 from routes.public_api import router as public_api_router, admin_router as apikeys_admin_router
 from routes.youtube import router as youtube_router
-from routes.youtube_agents import router as youtube_agents_router
 from routes.startup import router as startup_router
 
 ROOT_DIR = Path(__file__).parent
@@ -38,7 +36,6 @@ app.include_router(news_router)
 app.include_router(upload_router)
 app.include_router(reporter_router)
 app.include_router(analytics_router)
-app.include_router(media_router)
 app.include_router(epaper_router)
 app.include_router(scraper_router)
 app.include_router(agents_router)
@@ -49,7 +46,6 @@ app.include_router(seo_engine_router)
 app.include_router(public_api_router)
 app.include_router(apikeys_admin_router)
 app.include_router(youtube_router)
-app.include_router(youtube_agents_router)
 app.include_router(startup_router)
 
 # GZip compression — compress responses > 500 bytes

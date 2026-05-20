@@ -13,9 +13,7 @@ import { NewsFeed } from "./pages/NewsFeed";
 import { SavedArticles } from "./pages/SavedArticles";
 import { AdminPanel } from "./pages/AdminPanel";
 import { ArticleModal } from "./components/ArticleModal";
-import { ShortsPlayer } from "./pages/SwipeReader";
 import { VideoNews } from "./pages/VideoNews";
-import LiveTV from "./pages/LiveTV";
 import { ReporterRegister } from "./pages/ReporterRegister";
 import { ReporterDashboard } from "./pages/ReporterDashboard";
 import LoginPage from "./pages/LoginPage";
@@ -216,10 +214,9 @@ function AppContent() {
   const isSwipeMode = false; // Keep header/nav on all pages
   const isReporterPage = location.pathname.startsWith("/reporter");
   const isLoginPage = location.pathname === "/reporter-login";
-  const isLivePage = location.pathname === "/live";
   const isEpaperPage = location.pathname === "/epaper";
   const isStartupPage = location.pathname === "/startup-apply";
-  const showFloatingLive = !isAdminPage && !isSwipeMode && !isReporterPage && !isLoginPage && !isLivePage && !isEpaperPage && !isStartupPage;
+  const showFloatingLive = !isAdminPage && !isSwipeMode && !isReporterPage && !isLoginPage && !isEpaperPage && !isStartupPage;
 
   // Protect admin route
   if (isAdminPage && !isAdmin) {
@@ -245,9 +242,7 @@ function AppContent() {
         <main className={`${isAdminPage || isSwipeMode || isReporterPage ? "" : "safe-area-bottom"}`}>
           <Routes>
             <Route path="/" element={<NewsFeed />} />
-            <Route path="/swipe" element={<ShortsPlayer />} />
             <Route path="/videos" element={<VideoNews />} />
-            <Route path="/live" element={<LiveTV />} />
             <Route path="/saved" element={<SavedArticles />} />
             <Route path="/admin" element={<AdminPanel />} />
             <Route path="/analytics" element={<AnalyticsDashboard />} />
