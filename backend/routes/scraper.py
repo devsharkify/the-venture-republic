@@ -1,11 +1,29 @@
 """
 TVR Backend Scraper — Startup/Funding focused RSS + Entrackr sitemap
-Replaces Siasat/DC/TOI/Eenadu with quality Indian startup news sources.
-Integrates Gemini 2.5 Flash for title & summary rephrase.
+
+══════════════════════════════════════════════════════════════════════
+SCRAPING RULES (enforced in code — do NOT bypass):
+══════════════════════════════════════════════════════════════════════
+RULE 1 — REPHRASE ALWAYS:
+  Every article's title AND summary MUST be rephrased by Gemini before
+  saving. The original source text must never appear verbatim in the DB.
+  The save function will NOT proceed without calling gemini_rephrase().
+
+RULE 2 — WATERMARK / LOGO REJECTION:
+  Every image is checked via Gemini Vision before saving. If the image
+  contains ANY visible watermark, logo, or branding from another website
+  or publication (YourStory, Economic Times, Entrackr, Mint, Getty,
+  Shutterstock, Dreamstime, Moneycontrol, Reuters, etc.), the article is
+  SILENTLY DROPPED and NOT saved to the database.
+
+RULE 3 — STARTUP RELEVANCE:
+  Only articles passing the India + startup/funding signal filters are
+  accepted.
+══════════════════════════════════════════════════════════════════════
 """
 from fastapi import APIRouter
 from datetime import datetime, timezone, timedelta
-import asyncio, uuid, os, re
+import asyncio, uuid, os, re, base64
 import feedparser
 import httpx
 from bs4 import BeautifulSoup
@@ -166,6 +184,76 @@ async def gemini_rephrase(client: httpx.AsyncClient, title: str, summary: str) -
     return new_title, new_summary
 
 
+# ── Watermark / logo check (RULE 2) ───────────────────────────────────────────
+
+WATERMARK_PROMPT = (
+    "Does this image contain ANY visible watermark, logo, or branding text from "
+    "another media/news website? Examples: YourStory (YS), Economic Times (ET Rise, "
+    "ET Tech, ET Markets), Entrackr, Mint/LiveMint, Moneycontrol, Getty Images, "
+    "Shutterstock, Dreamstime, Adobe Stock, Reuters, AFP, PTI, ANI, CarTrade, Digit, "
+    "StartupTalky, SiliconRoad, or any other publication's name/logo overlaid on the image. "
+    "Respond with ONLY valid JSON: "
+    '{"has_watermark": true, "reason": "..."} or {"has_watermark": false, "reason": "clean"}'
+)
+
+WATERMARK_GEMINI_URL = (
+    "https://generativelanguage.googleapis.com/v1beta/models/"
+    "gemini-2.5-flash:generateContent?key={key}"
+)
+
+
+async def image_has_watermark(client: httpx.AsyncClient, image_url: str) -> bool:
+    """
+    RULE 2: Check image for third-party watermarks via Gemini Vision.
+    Returns True if watermark detected (article should be DROPPED).
+    Returns False if clean (article may be saved).
+    On any error, returns False (benefit of doubt — don't block on API issues).
+    """
+    if not image_url or not GEMINI_KEY:
+        return False
+    try:
+        r = await client.get(image_url, headers=HEADERS, timeout=12, follow_redirects=True)
+        if r.status_code != 200 or len(r.content) < 500:
+            return False
+        ct = r.headers.get("content-type", "image/jpeg").split(";")[0].strip()
+        if ct not in ("image/jpeg", "image/png", "image/webp"):
+            ct = "image/jpeg"
+        img_b64 = base64.b64encode(r.content).decode("utf-8")
+    except Exception as e:
+        logger.debug(f"Watermark check download failed for {image_url}: {e}")
+        return False
+
+    payload = {
+        "contents": [{"parts": [
+            {"text": WATERMARK_PROMPT},
+            {"inline_data": {"mime_type": ct, "data": img_b64}},
+        ]}],
+        "generationConfig": {
+            "temperature": 0,
+            "maxOutputTokens": 120,
+            "responseMimeType": "application/json",
+        },
+    }
+    try:
+        api_url = WATERMARK_GEMINI_URL.format(key=GEMINI_KEY)
+        resp = await client.post(api_url, json=payload, timeout=25)
+        raw = resp.json()
+        if "error" in raw:
+            logger.debug(f"Watermark API error: {raw['error'].get('message','?')}")
+            return False
+        text = raw["candidates"][0]["content"]["parts"][0]["text"].strip()
+        text = text.replace("```json", "").replace("```", "").strip()
+        import json as _json
+        result = _json.loads(text)
+        if result.get("has_watermark"):
+            logger.info(f"[WATERMARK DROP] {image_url[:60]} — {result.get('reason','')}")
+            return True
+        return False
+    except Exception as e:
+        logger.debug(f"Watermark check parse error for {image_url}: {e}")
+        return False
+
+
 # ── Article page extractor ─────────────────────────────────────────────────────
 
 async def extract_article_page(client: httpx.AsyncClient, url: str) -> dict:
@@ -247,11 +335,15 @@ async def save_startup_article(
     if not is_startup_relevant(title, text, trusted=trusted):
         return False
 
+    # ── RULE 2: Reject articles whose image has a third-party watermark/logo ──
+    if await image_has_watermark(client, image):
+        return False
+
     cat = detect_category(title, text)
     if cat not in CATEGORIES:
         cat = "business"
 
-    # Gemini rephrase
+    # ── RULE 1: Always rephrase title and summary via Gemini ─────────────────
     new_title, new_summary = await gemini_rephrase(client, title, text or title)
 
     doc = {
