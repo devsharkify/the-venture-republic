@@ -30,6 +30,10 @@ import AboutPage from "./pages/AboutPage";
 import ContactPage from "./pages/ContactPage";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
+import CookiePolicy from "./pages/CookiePolicy";
+import Disclaimer from "./pages/Disclaimer";
+import AdvertisePage from "./pages/AdvertisePage";
+import WriteForUs from "./pages/WriteForUs";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || "https://the-venture-republic-production.up.railway.app";
 export const API = `${BACKEND_URL}/api`;
@@ -258,6 +262,10 @@ function AppContent() {
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/terms" element={<TermsOfService />} />
+            <Route path="/cookie-policy" element={<CookiePolicy />} />
+            <Route path="/disclaimer" element={<Disclaimer />} />
+            <Route path="/advertise" element={<AdvertisePage />} />
+            <Route path="/write-for-us" element={<WriteForUs />} />
           </Routes>
         </main>
         <Footer />
