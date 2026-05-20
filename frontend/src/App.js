@@ -20,7 +20,6 @@ import { ReporterRegister } from "./pages/ReporterRegister";
 import { ReporterDashboard } from "./pages/ReporterDashboard";
 import LoginPage from "./pages/LoginPage";
 import { AnalyticsDashboard } from "./pages/AnalyticsDashboard";
-import ProfilePage from "./pages/ProfilePage";
 import EpaperPage from "./pages/EpaperPage";
 import ArticlePage from "./pages/ArticlePage";
 import AgentsDashboard from "./pages/AgentsDashboard";
@@ -242,7 +241,6 @@ function AppContent() {
             <Route path="/reporter/register" element={<ReporterRegister />} />
             <Route path="/reporter/dashboard/:reporterId" element={<ReporterDashboard />} />
             <Route path="/reporter-login" element={<LoginPage onLoginSuccess={handleLoginSuccess} />} />
-            <Route path="/profile" element={<ProfilePage />} />
             <Route path="/epaper" element={<EpaperPage />} />
             <Route path="/news/:id" element={<ArticlePage />} />
             <Route path="/agents" element={<AgentsDashboard />} />

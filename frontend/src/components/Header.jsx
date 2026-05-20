@@ -1,7 +1,7 @@
 import { useContext } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { AppContext } from "../App";
-import { Moon, Sun, Settings, ArrowLeft, LogOut, User, Menu } from "lucide-react";
+import { Moon, Sun, Settings, ArrowLeft, LogOut, Menu } from "lucide-react";
 
 export const Header = () => {
   const { darkMode, toggleDarkMode, isAdmin, isLoggedIn, handleLogout } = useContext(AppContext);
@@ -68,22 +68,6 @@ export const Header = () => {
               {darkMode ? <Sun size={13} /> : <Moon size={13} />}
             </button>
 
-            <button
-              data-testid="profile-btn"
-              onClick={() => navigate("/profile")}
-              className={`p-1 rounded transition-colors ${
-                location.pathname === "/profile"
-                  ? darkMode
-                    ? "text-white bg-slate-700"
-                    : "text-white bg-blue-700"
-                  : darkMode
-                  ? "text-slate-400 hover:text-slate-200 hover:bg-slate-800"
-                  : "text-blue-100 hover:text-white hover:bg-blue-700"
-              }`}
-              aria-label="Profile"
-            >
-              <User size={13} />
-            </button>
           </div>
         </div>
       </div>
@@ -193,22 +177,6 @@ export const Header = () => {
               {darkMode ? <Sun size={18} /> : <Moon size={18} />}
             </button>
 
-            {/* Profile icon (visible on mobile; desktop uses utility bar) */}
-            <button
-              onClick={() => navigate("/profile")}
-              className={`p-2.5 rounded-lg transition-all md:hidden ${
-                location.pathname === "/profile"
-                  ? darkMode
-                    ? "text-slate-200 bg-slate-800"
-                    : "text-slate-900 bg-slate-100"
-                  : darkMode
-                  ? "text-slate-400 hover:text-slate-200 hover:bg-slate-800"
-                  : "text-slate-500 hover:text-slate-900 hover:bg-slate-100"
-              }`}
-              aria-label="Profile"
-            >
-              <User size={18} />
-            </button>
           </div>
         </div>
       </div>
