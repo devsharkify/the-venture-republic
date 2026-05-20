@@ -4,7 +4,7 @@ import "@/App.css";
 import { BrowserRouter, Routes, Route, useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Toaster, toast } from "sonner";
-import { registerServiceWorker, startBreakingNewsPolling, requestNotificationPermission } from "./utils/notifications";
+import { registerServiceWorker } from "./utils/notifications";
 
 // Components
 import { Header } from "./components/Header";
@@ -26,6 +26,7 @@ import ArticlePage from "./pages/ArticlePage";
 import AgentsDashboard from "./pages/AgentsDashboard";
 import StartupApply from "./pages/StartupApply";
 import { VisitorCounter } from "./components/VisitorCounter";
+import { Footer } from "./components/Footer";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || "https://the-venture-republic-production.up.railway.app";
 export const API = `${BACKEND_URL}/api`;
@@ -98,13 +99,9 @@ function AppContent() {
     localStorage.setItem("savedArticles", JSON.stringify(savedArticles));
   }, [savedArticles]);
 
-  // Breaking news notifications
+  // Service worker only (no breaking news popup)
   useEffect(() => {
     registerServiceWorker();
-    requestNotificationPermission();
-    startBreakingNewsPolling((article) => {
-      toast.info(`Breaking: ${article.title}`, { duration: 8000 });
-    });
   }, []);
 
   const toggleLanguage = useCallback(() => {
@@ -248,6 +245,7 @@ function AppContent() {
             <Route path="/startup-apply" element={<StartupApply />} />
           </Routes>
         </main>
+        <Footer />
         {!isSwipeMode && <ArticleModal />}
         <Toaster position="top-center" richColors theme={darkMode ? "dark" : "light"} />
       </div>

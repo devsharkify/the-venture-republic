@@ -19,7 +19,7 @@ export const Header = () => {
       }`}
       data-testid="header"
     >
-      <div className="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
+      <div className="max-w-screen-xl mx-auto px-4 h-16 flex items-center justify-between">
         {/* Left: hamburger (decorative) or back button */}
         <div className="flex items-center gap-2 w-[80px]">
           {!isHomePage ? (
@@ -51,7 +51,7 @@ export const Header = () => {
           onClick={() => navigate("/")}
         >
           <span
-            className={`font-serif-display text-[20px] md:text-[22px] tracking-tight leading-none font-bold ${
+            className={`font-serif-display text-[22px] md:text-[28px] tracking-tight leading-none font-bold ${
               darkMode ? "text-white" : "text-slate-900"
             }`}
           >
