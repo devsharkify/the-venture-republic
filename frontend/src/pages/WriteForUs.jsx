@@ -136,11 +136,11 @@ export default function WriteForUs() {
             any of the following:
           </Para>
           <BulletList items={[
-            "Founder stories — First-person accounts of building a startup in India, including the hard lessons, pivots, and breakthroughs that rarely make press releases.",
-            "Investment analysis — Sector-specific deep dives into funding trends, emerging categories, and what Indian venture capital is (and isn't) backing right now.",
-            "Policy commentary — Informed, evidence-based perspectives on how regulation, government schemes, and policy shifts are reshaping the startup landscape.",
-            "Startup ecosystem deep dives — Long-form analysis of specific sectors, geographies, or cohorts within the Indian startup ecosystem.",
-            "Op-eds on Indian tech & business — Opinionated, well-argued pieces on the forces shaping India's entrepreneurial economy — from talent and capital to infrastructure and culture.",
+            "Founder stories - First-person accounts of building a startup in India, including the hard lessons, pivots, and breakthroughs that rarely make press releases.",
+            "Investment analysis - Sector-specific deep dives into funding trends, emerging categories, and what Indian venture capital is (and isn't) backing right now.",
+            "Policy commentary - Informed, evidence-based perspectives on how regulation, government schemes, and policy shifts are reshaping the startup landscape.",
+            "Startup ecosystem deep dives - Long-form analysis of specific sectors, geographies, or cohorts within the Indian startup ecosystem.",
+            "Op-eds on Indian tech & business - Opinionated, well-argued pieces on the forces shaping India's entrepreneurial economy - from talent and capital to infrastructure and culture.",
           ]} />
         </Section>
 
@@ -154,7 +154,7 @@ export default function WriteForUs() {
             "Original, unpublished content only. We do not accept articles that have been published elsewhere, including on personal blogs, LinkedIn Articles, or other media outlets. Simultaneous submissions are not accepted.",
             "Minimum 600 words. Pieces under 600 words are unlikely to provide the depth our readers expect. Most published contributions fall between 800 and 1,500 words.",
             "Include your bio and LinkedIn profile. All contributors must provide a short author bio (2–3 sentences) and a link to their LinkedIn profile for verification and the author byline.",
-            "No promotional or self-serving content. We do not publish content whose primary purpose is to market a product, service, or company — including the author's own. Mentions of relevant companies or products are acceptable only when editorially justified.",
+            "No promotional or self-serving content. We do not publish content whose primary purpose is to market a product, service, or company - including the author's own. Mentions of relevant companies or products are acceptable only when editorially justified.",
             "We reserve the right to edit for style and clarity. Accepted pieces will be edited in accordance with our editorial style guide. We will share significant edits with you before publication, but minor edits for grammar, clarity, and house style may be made without prior approval.",
             "Response time is 5–7 business days. We review every pitch carefully. If you have not heard from us within 7 business days, you may follow up once by email.",
           ]} />
@@ -236,7 +236,7 @@ export default function WriteForUs() {
             </p>
             <p className="text-[14px] text-slate-500 dark:text-slate-400">
               <span className="font-semibold text-slate-700 dark:text-slate-200">Subject line:</span>{" "}
-              <span className="font-mono text-[13px]">Contributor Pitch — [Your Topic]</span>
+              <span className="font-mono text-[13px]">Contributor Pitch - [Your Topic]</span>
             </p>
             <p className="text-[14px] text-slate-500 dark:text-slate-400 mt-1">
               Please include your name, a brief bio, your LinkedIn profile URL, and your pitch

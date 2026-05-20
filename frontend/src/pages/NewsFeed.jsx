@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext, useCallback, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios";
 import { API, AppContext } from "../App";
 import { CategoryChips } from "../components/CategoryChips";
@@ -234,10 +234,11 @@ function SidebarLatest({ articles, darkMode, language }) {
 export default function NewsFeed() {
   const { language, darkMode } = useContext(AppContext);
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [activeCategory, setActiveCategory] = useState("all");
+  const [activeCategory, setActiveCategory] = useState(searchParams.get("cat") || "all");
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(0);
   const [sortBy, setSortBy] = useState("newest");
@@ -323,9 +324,19 @@ export default function NewsFeed() {
     }
   }, [activeCategory, sortBy, timeFilter, language, fetchNews, isSearching, searchQuery, searchNews]);
 
+  // Sync activeCategory when URL ?cat= param changes (e.g. footer links)
+  useEffect(() => {
+    const cat = searchParams.get("cat") || "all";
+    setActiveCategory(prev => (prev !== cat ? cat : prev));
+  }, [searchParams]);
+
   const handleCategoryChange = (category) => {
     setActiveCategory(category);
     setPage(0);
+    const next = new URLSearchParams(searchParams);
+    if (category === "all") next.delete("cat");
+    else next.set("cat", category);
+    setSearchParams(next, { replace: true });
   };
 
   const handleLoadMore = () => {

@@ -104,7 +104,7 @@ export default function AdvertisePage() {
       icon: "📢",
       title: "Event Coverage",
       description:
-        "Amplify your announcements — funding rounds, product launches, leadership hires, and milestones — through dedicated editorial coverage and social amplification. Get your news in front of the right audience on the right day.",
+        "Amplify your announcements - funding rounds, product launches, leadership hires, and milestones - through dedicated editorial coverage and social amplification. Get your news in front of the right audience on the right day.",
     },
   ];
 
@@ -156,11 +156,11 @@ export default function AdvertisePage() {
             India&rsquo;s top startup hubs:
           </Para>
           <BulletList items={[
-            "Bengaluru — India's Silicon Valley, home to our largest reader segment",
-            "Mumbai — Financial capital, strong representation from VC and PE professionals",
-            "Delhi NCR — Policy makers, enterprise buyers, and D2C founders",
-            "Hyderabad — Fast-growing tech and pharma ecosystem readers",
-            "Pune, Chennai & beyond — Rapidly expanding tier-2 startup city coverage",
+            "Bengaluru - India's Silicon Valley, home to our largest reader segment",
+            "Mumbai - Financial capital, strong representation from VC and PE professionals",
+            "Delhi NCR - Policy makers, enterprise buyers, and D2C founders",
+            "Hyderabad - Fast-growing tech and pharma ecosystem readers",
+            "Pune, Chennai & beyond - Rapidly expanding tier-2 startup city coverage",
           ]} />
         </Section>
 
@@ -181,10 +181,10 @@ export default function AdvertisePage() {
         {/* Why Advertise */}
         <Section title="Why Advertise With Us?" darkMode={darkMode}>
           <BulletList items={[
-            "Premium, contextual audience: Every reader is here because they care about the startup ecosystem — no wasted impressions.",
+            "Premium, contextual audience: Every reader is here because they care about the startup ecosystem - no wasted impressions.",
             "Editorial credibility: Sponsored content on The Venture Republic carries the trust readers place in our editorial voice.",
-            "Precise targeting: Reach readers by category — Fintech, SaaS, EV, D2C, Policy, and more.",
-            "Engaged readership: Our average reader spends over four minutes per article — well above industry benchmarks.",
+            "Precise targeting: Reach readers by category - Fintech, SaaS, EV, D2C, Policy, and more.",
+            "Engaged readership: Our average reader spends over four minutes per article - well above industry benchmarks.",
             "Transparent reporting: All campaigns come with clear performance summaries covering reach, clicks, and engagement.",
             "Flexible formats: From a single newsletter slot to a multi-month content partnership, we design campaigns around your goals.",
           ]} />
