@@ -78,6 +78,11 @@ if frontend_build.exists():
     # Serve bundled JS/CSS at /static/*
     app.mount("/static", StaticFiles(directory=str(frontend_build / "static")), name="react-static")
 
+    # Root route
+    @app.get("/")
+    async def serve_root():
+        return FileResponse(str(frontend_build / "index.html"))
+
     # Catch-all: serve exact file if it exists, else index.html (React Router)
     @app.get("/{full_path:path}")
     async def serve_spa(full_path: str):
