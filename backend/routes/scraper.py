@@ -189,12 +189,19 @@ async def gemini_rephrase(client: httpx.AsyncClient, title: str, summary: str) -
 # ── Watermark / logo check (RULE 2) ───────────────────────────────────────────
 
 WATERMARK_PROMPT = (
-    "Does this image contain ANY visible watermark, logo, or branding text from "
-    "another media/news website? Examples: YourStory (YS), Economic Times (ET Rise, "
-    "ET Tech, ET Markets), Entrackr, Mint/LiveMint, Moneycontrol, Getty Images, "
-    "Shutterstock, Dreamstime, Adobe Stock, Reuters, AFP, PTI, ANI, CarTrade, Digit, "
-    "StartupTalky, SiliconRoad, or any other publication's name/logo overlaid on the image. "
-    "Respond with ONLY valid JSON: "
+    "Examine this image VERY carefully for ANY of the following — even small, faint, "
+    "or partially visible elements in ANY corner or area of the image:\n"
+    "1. Text logos or brand names: ET Rise, ET Tech, ET Markets, Economic Times, "
+    "YourStory, YS, Entrackr, Mint, LiveMint, Moneycontrol, Getty Images, Shutterstock, "
+    "Dreamstime, Adobe Stock, iStockphoto, Reuters, AFP, PTI, ANI, IANS, CarTrade, "
+    "Digit, StartupTalky, SiliconRoad, TechCrunch, Inc42, BusinessLine, Hindu, NDTV, "
+    "Bloomberg, Forbes, Fortune, Business Today, Financial Express, or ANY other "
+    "publication/agency/stock-photo name.\n"
+    "2. Any logo mark, icon, or watermark text overlaid on the photo.\n"
+    "3. Any colored text box or badge in a corner that identifies the image source.\n"
+    "If you see ANY of the above — even small text in a corner — respond has_watermark=true.\n"
+    "IMPORTANT: Be strict. False positives are better than missing a watermark.\n"
+    "Respond ONLY with valid JSON: "
     '{"has_watermark": true, "reason": "..."} or {"has_watermark": false, "reason": "clean"}'
 )
 
@@ -607,3 +614,33 @@ async def get_breaking_news():
 @router.get("/health")
 async def health_check():
     return {"status": "ok"}
+
+
+# ── Bulk watermark re-scan ─────────────────────────────────────────────────────
+
+@router.post("/scraper/rescan-watermarks")
+async def rescan_watermarks():
+    """
+    Re-scan ALL active articles for watermarks using the updated Gemini Vision prompt.
+    Deletes any article whose image is flagged. Returns a summary.
+    """
+    deleted, skipped, clean = 0, 0, 0
+    async with httpx.AsyncClient(headers=HEADERS) as client:
+        cursor = db.news.find({"is_active": True}, {"id": 1, "image": 1, "title": 1})
+        async for doc in cursor:
+            image_url = doc.get("image", "")
+            if not image_url:
+                skipped += 1
+                continue
+            try:
+                flagged = await image_has_watermark(client, image_url)
+                if flagged:
+                    await db.news.delete_one({"id": doc["id"]})
+                    logger.info(f"[RESCAN DELETE] {doc.get('title','?')[:60]}")
+                    deleted += 1
+                else:
+                    clean += 1
+            except Exception as e:
+                logger.warning(f"Rescan error for {image_url[:60]}: {e}")
+                skipped += 1
+    return {"deleted": deleted, "clean": clean, "skipped": skipped}
