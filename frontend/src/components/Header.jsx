@@ -1,10 +1,10 @@
 import { useContext } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { AppContext } from "../App";
-import { Moon, Sun, Settings, ArrowLeft, LogOut } from "lucide-react";
+import { Moon, Sun, Settings, ArrowLeft } from "lucide-react";
 
 export const Header = () => {
-  const { darkMode, toggleDarkMode, isAdmin, isLoggedIn, handleLogout } = useContext(AppContext);
+  const { darkMode, toggleDarkMode, isAdmin } = useContext(AppContext);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -124,21 +124,6 @@ export const Header = () => {
                 aria-label="Admin settings"
               >
                 <Settings size={18} />
-              </button>
-            )}
-
-            {isLoggedIn && (
-              <button
-                data-testid="logout-btn"
-                onClick={handleLogout}
-                className={`p-2.5 rounded-lg transition-all ${
-                  darkMode
-                    ? "text-slate-400 hover:text-red-400 hover:bg-slate-800"
-                    : "text-slate-500 hover:text-red-500 hover:bg-red-50"
-                }`}
-                aria-label="Log out"
-              >
-                <LogOut size={18} />
               </button>
             )}
 

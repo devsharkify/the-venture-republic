@@ -16,7 +16,6 @@ import { ArticleModal } from "./components/ArticleModal";
 import { VideoNews } from "./pages/VideoNews";
 import { ReporterRegister } from "./pages/ReporterRegister";
 import { ReporterDashboard } from "./pages/ReporterDashboard";
-import LoginPage from "./pages/LoginPage";
 import { AnalyticsDashboard } from "./pages/AnalyticsDashboard";
 import EpaperPage from "./pages/EpaperPage";
 import ArticlePage from "./pages/ArticlePage";
@@ -125,25 +124,6 @@ function AppContent() {
     setDarkMode(prev => !prev);
   }, []);
 
-  const handleLoginSuccess = useCallback((userData, isAdminUser) => {
-    setUser(userData);
-    setIsLoggedIn(true);
-    setIsAdmin(isAdminUser || false);
-    if (isAdminUser) {
-      navigate("/admin");
-    } else {
-      // Check if reporter exists
-      const phone = userData.phone;
-      axios.get(`${API}/reporter/check/${phone}`).then(r => {
-        if (r.data && r.data.registered && r.data.id) {
-          navigate(`/reporter/dashboard/${r.data.id}`);
-        } else {
-          navigate("/reporter/register");
-        }
-      }).catch(() => navigate("/reporter/register"));
-    }
-  }, [navigate]);
-
   const handleLogout = useCallback(() => {
     localStorage.removeItem("user");
     localStorage.removeItem("userPhone");
@@ -213,10 +193,9 @@ function AppContent() {
   const isAdminPage = location.pathname === "/admin" || location.pathname === "/analytics" || location.pathname === "/agents";
   const isSwipeMode = false; // Keep header/nav on all pages
   const isReporterPage = location.pathname.startsWith("/reporter");
-  const isLoginPage = location.pathname === "/reporter-login";
   const isEpaperPage = location.pathname === "/epaper";
   const isStartupPage = location.pathname === "/startup-apply";
-  const showFloatingLive = !isAdminPage && !isSwipeMode && !isReporterPage && !isLoginPage && !isEpaperPage && !isStartupPage;
+  const showFloatingLive = !isAdminPage && !isSwipeMode && !isReporterPage && !isEpaperPage && !isStartupPage;
 
   // Protect admin route
   if (isAdminPage && !isAdmin) {
@@ -238,7 +217,7 @@ function AppContent() {
     <AppContext.Provider value={contextValue}>
       <div className={`min-h-screen ${darkMode ? "dark bg-slate-900" : "bg-slate-50"}`}>
         <ScrollToTop />
-        {!isSwipeMode && !isReporterPage && !isLoginPage && <Header />}
+        {!isSwipeMode && !isReporterPage && <Header />}
         <main className={`${isAdminPage || isSwipeMode || isReporterPage ? "" : "safe-area-bottom"}`}>
           <Routes>
             <Route path="/" element={<NewsFeed />} />
@@ -248,7 +227,6 @@ function AppContent() {
             <Route path="/analytics" element={<AnalyticsDashboard />} />
             <Route path="/reporter/register" element={<ReporterRegister />} />
             <Route path="/reporter/dashboard/:reporterId" element={<ReporterDashboard />} />
-            <Route path="/reporter-login" element={<LoginPage onLoginSuccess={handleLoginSuccess} />} />
             <Route path="/epaper" element={<EpaperPage />} />
             <Route path="/news/:id" element={<ArticlePage />} />
             <Route path="/agents" element={<AgentsDashboard />} />

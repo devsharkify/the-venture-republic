@@ -4,7 +4,7 @@ import feedparser, aiohttp
 from bs4 import BeautifulSoup
 from motor.motor_asyncio import AsyncIOMotorClient
 
-MONGO_URL = "mongodb+srv://admin:ak09tKmeXt1zM8AN@venture-republic.teugymk.mongodb.net/?retryWrites=true&w=majority&appName=venture-republic"
+MONGO_URL = "mongodb+srv://admin:sscBnar6pLNqaaL7@cluster0.tuk1rfj.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
 DB_NAME = "venture_republic"
 CUTOFF = datetime(2026, 2, 19, tzinfo=timezone.utc)
 TARGET = 300
