@@ -35,6 +35,22 @@ FEEDS = [
     {"url": "https://entrackr.com/feed/", "source": "Entrackr"},
     {"url": "https://www.business-standard.com/rss/companies-101.rss", "source": "Business Standard"},
     {"url": "https://www.business-standard.com/rss/technology-108.rss", "source": "Business Standard Tech"},
+    # ── Additional sources ──────────────────────────────────────────────────
+    {"url": "https://www.livemint.com/rss/companies", "source": "Mint"},
+    {"url": "https://www.livemint.com/rss/technology", "source": "Mint Tech"},
+    {"url": "https://www.businesstoday.in/rss.cms", "source": "Business Today"},
+    {"url": "https://www.fortuneindia.com/rss.xml", "source": "Fortune India"},
+    {"url": "https://www.financialexpress.com/industry/feed/", "source": "Financial Express"},
+    {"url": "https://www.thehindubusinessline.com/economy/feed", "source": "Hindu BusinessLine"},
+    {"url": "https://bwdisrupt.com/feed/", "source": "BW Disrupt"},
+    {"url": "https://www.medianama.com/feed/", "source": "Medianama"},
+    {"url": "https://inc42.com/category/startups/feed/", "source": "Inc42 Startups"},
+    {"url": "https://inc42.com/category/funding/feed/", "source": "Inc42 Funding"},
+    {"url": "https://thenextweb.com/feed/", "source": "TNW"},
+    {"url": "https://restofworld.org/feed/", "source": "Rest of World"},
+    {"url": "https://economictimes.indiatimes.com/markets/rssfeeds/1977021501.cms", "source": "ET Markets"},
+    {"url": "https://www.outlookindia.com/business/rss", "source": "Outlook Business"},
+    {"url": "https://www.deccanherald.com/business/rss_feed.php", "source": "Deccan Herald"},
 ]
 
 def detect_cat(title, text):

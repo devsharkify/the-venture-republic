@@ -416,11 +416,117 @@ async def save_startup_article(
     try:
         await db.news.insert_one(doc)
         logger.info(f"[{cat}] Saved: {new_title[:60]}")
+        # Auto-post to Twitter/LinkedIn (fires & forgets — no keys = silent skip)
+        asyncio.create_task(_social_post(new_title, slug, new_summary))
         return True
     except Exception as e:
         if "duplicate" not in str(e).lower():
             logger.error(f"Save error for {url}: {e}")
         return False
+
+
+# ── Social auto-post (Twitter / X + LinkedIn) ─────────────────────────────────
+
+async def _social_post(title: str, slug: str, summary: str):
+    """
+    Post new article to Twitter/X and LinkedIn.
+    Set these env vars in Railway to activate:
+      TWITTER_API_KEY, TWITTER_API_SECRET,
+      TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET
+      LINKEDIN_ACCESS_TOKEN, LINKEDIN_AUTHOR_URN  (urn:li:person:XXXXXX)
+    """
+    import os, hmac, hashlib, time as _t, urllib.parse, base64 as _b64, secrets as _sec
+    article_url = f"https://www.theventurerepublic.in/news/{slug}"
+    tweet_text  = f"{title}\n\n{article_url}\n\n#startup #India #TheVentureRepublic"[:280]
+
+    # ── Twitter / X ──────────────────────────────────────────────────────────
+    tw_key    = os.getenv("TWITTER_API_KEY", "")
+    tw_secret = os.getenv("TWITTER_API_SECRET", "")
+    tw_token  = os.getenv("TWITTER_ACCESS_TOKEN", "")
+    tw_tsec   = os.getenv("TWITTER_ACCESS_TOKEN_SECRET", "")
+
+    if all([tw_key, tw_secret, tw_token, tw_tsec]):
+        try:
+            import aiohttp as _ah
+
+            # OAuth 1.0a signing
+            ts    = str(int(_t.time()))
+            nonce = _sec.token_hex(16)
+            params = {
+                "oauth_consumer_key":     tw_key,
+                "oauth_nonce":            nonce,
+                "oauth_signature_method": "HMAC-SHA1",
+                "oauth_timestamp":        ts,
+                "oauth_token":            tw_token,
+                "oauth_version":          "1.0",
+            }
+            base_url  = "https://api.twitter.com/2/tweets"
+            body_data = {"text": tweet_text}
+
+            # Build signature
+            all_params = {**params}
+            param_str  = "&".join(f"{urllib.parse.quote(k,'')}"
+                                  f"={urllib.parse.quote(str(v),'')}"
+                                  for k, v in sorted(all_params.items()))
+            sig_base   = ("POST&" + urllib.parse.quote(base_url, "") +
+                          "&" + urllib.parse.quote(param_str, ""))
+            signing_key = urllib.parse.quote(tw_secret, "") + "&" + urllib.parse.quote(tw_tsec, "")
+            signature   = _b64.b64encode(
+                hmac.new(signing_key.encode(), sig_base.encode(), hashlib.sha1).digest()
+            ).decode()
+            params["oauth_signature"] = signature
+
+            auth_header = "OAuth " + ", ".join(
+                f'{urllib.parse.quote(k, "")}="{urllib.parse.quote(str(v), "")}"'
+                for k, v in sorted(params.items())
+            )
+            async with _ah.ClientSession() as s:
+                async with s.post(
+                    base_url,
+                    json=body_data,
+                    headers={"Authorization": auth_header, "Content-Type": "application/json"},
+                    timeout=_ah.ClientTimeout(total=10),
+                ) as r:
+                    if r.status in (200, 201):
+                        logger.info(f"[Twitter] Tweeted: {title[:50]}")
+                    else:
+                        logger.warning(f"[Twitter] {r.status}: {await r.text()}")
+        except Exception as e:
+            logger.warning(f"[Twitter] post failed: {e}")
+
+    # ── LinkedIn ─────────────────────────────────────────────────────────────
+    li_token  = os.getenv("LINKEDIN_ACCESS_TOKEN", "")
+    li_author = os.getenv("LINKEDIN_AUTHOR_URN", "")   # urn:li:person:XXXXX
+
+    if li_token and li_author:
+        try:
+            import aiohttp as _ah
+            snippet = (summary or "")[:500]
+            payload = {
+                "author":     li_author,
+                "lifecycleState": "PUBLISHED",
+                "specificContent": {
+                    "com.linkedin.ugc.ShareContent": {
+                        "shareCommentary": {"text": f"{title}\n\n{snippet}\n\n{article_url}"},
+                        "shareMediaCategory": "ARTICLE",
+                        "media": [{"status": "READY", "originalUrl": article_url}],
+                    }
+                },
+                "visibility": {"com.linkedin.ugc.MemberNetworkVisibility": "PUBLIC"},
+            }
+            async with _ah.ClientSession() as s:
+                async with s.post(
+                    "https://api.linkedin.com/v2/ugcPosts",
+                    json=payload,
+                    headers={"Authorization": f"Bearer {li_token}", "Content-Type": "application/json"},
+                    timeout=_ah.ClientTimeout(total=10),
+                ) as r:
+                    if r.status in (200, 201):
+                        logger.info(f"[LinkedIn] Posted: {title[:50]}")
+                    else:
+                        logger.warning(f"[LinkedIn] {r.status}: {await r.text()}")
+        except Exception as e:
+            logger.warning(f"[LinkedIn] post failed: {e}")
 
 
 # ── RSS scraper ────────────────────────────────────────────────────────────────
