@@ -65,7 +65,7 @@ export const NewsCard = ({ article, index = 0, articlesList = [] }) => {
 
   const handleShare = (e) => {
     e.stopPropagation();
-    const shareUrl = `https://www.theventurerepublic.in/news/${article.id}`;
+    const shareUrl = `https://www.theventurerepublic.in/news/${article.slug || article.id}`;
     const shareText = `${title}\n\n${(summary || "").slice(0, 180)}...\n\n${shareUrl}`;
     if (navigator.share) {
       navigator.share({ title, text: (summary || "").slice(0, 200), url: shareUrl }).catch(() => {});
@@ -161,7 +161,7 @@ export const NewsCard = ({ article, index = 0, articlesList = [] }) => {
           <span>{readTime} min read</span>
           <span className="flex-1" />
           <a
-            href={`https://wa.me/?text=${encodeURIComponent((title || '') + ' - https://venturerepublic.in/news/' + article.id)}`}
+            href={`https://wa.me/?text=${encodeURIComponent((title || '') + ' - https://www.theventurerepublic.in/news/' + (article.slug || article.id))}`}
             target="_blank"
             rel="noopener noreferrer"
             onClick={e => e.stopPropagation()}

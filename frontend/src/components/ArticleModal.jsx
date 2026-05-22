@@ -84,7 +84,7 @@ export const ArticleModal = () => {
   };
   const handleShare = () => {
     // Share the branded theventurerepublic.in URL so the unfurl card shows the The Venture Republic domain.
-    const shareUrl = `https://www.theventurerepublic.in/news/${article.id}`;
+    const shareUrl = `https://www.theventurerepublic.in/news/${article.slug || article.id}`;
     const shareText = `${title}\n\n${summary?.slice(0, 180)}...\n\n${shareUrl}`;
     if (navigator.share) {
       navigator.share({ title, text: summary?.slice(0, 200), url: shareUrl }).catch(() => {});
@@ -123,7 +123,7 @@ export const ArticleModal = () => {
         <meta property="og:title" content={article.og_title || title} />
         <meta property="og:description" content={(article.og_description || article.summary || '').slice(0, 160)} />
         <meta property="og:image" content={article.og_image || article.image} />
-        <meta property="og:url" content={`https://venturerepublic.in/news/${article.id}`} />
+        <meta property="og:url" content={`https://www.theventurerepublic.in/news/${article.slug || article.id}`} />
         <meta property="og:type" content="article" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={article.og_title || title} />

@@ -362,8 +362,24 @@ async def save_startup_article(
     # ── RULE 1: Always rephrase title and summary via Gemini ─────────────────
     new_title, new_summary = await gemini_rephrase(client, title, text or title)
 
+    art_id = str(uuid.uuid4())
+    # Build slug from rephrased title (first 9 words, URL-safe)
+    def _slug(t: str) -> str:
+        c = re.sub(r'[\[\](){}₹$#@!%^&*,.:;"\'|<>?/\\]', ' ', t.lower())
+        c = re.sub(r'[^\w\s-]', '', c)
+        parts = [w for w in c.split() if w][:9]
+        return re.sub(r'-+', '-', '-'.join(parts)).strip('-')
+    base_slug = _slug(new_title or title)
+    # Ensure unique slug
+    slug = base_slug
+    counter = 1
+    while await db.news.find_one({"slug": slug}, {"_id": 1}):
+        counter += 1
+        slug = f"{base_slug}-{counter}"
+
     doc = {
-        "id": str(uuid.uuid4()),
+        "id": art_id,
+        "slug": slug,
         "title": new_title[:200],
         "title_orig": title[:200],
         "summary": new_summary,

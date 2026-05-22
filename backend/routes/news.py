@@ -11,11 +11,21 @@ router = APIRouter(prefix="/api")
 
 # Projection for feed — only fields the frontend actually needs
 FEED_PROJECTION = {
-    "_id": 0, "id": 1, "title": 1, "title_te": 1, "summary": 1, "summary_te": 1,
+    "_id": 0, "id": 1, "slug": 1, "title": 1, "title_te": 1, "summary": 1, "summary_te": 1,
     "category": 1, "category_label": 1, "category_label_te": 1, "image": 1,
     "video_url": 1, "content_type": 1, "link": 1, "is_pinned": 1, "source": 1,
     "published_at": 1, "created_at": 1,
 }
+
+import re as _re
+
+def make_slug(title: str, max_words: int = 9) -> str:
+    """Generate a URL-friendly slug from an article title."""
+    clean = _re.sub(r'[\[\](){}₹$#@!%^&*,.:;"\'|<>?/\\]', ' ', title.lower())
+    clean = _re.sub(r'[^\w\s-]', '', clean)
+    words = [w for w in clean.split() if w][:max_words]
+    slug = '-'.join(words)
+    return _re.sub(r'-+', '-', slug).strip('-')
 
 # Simple in-memory cache with TTL
 _cache = {}
@@ -52,7 +62,12 @@ async def get_categories():
 
 @router.get("/news/article/{article_id}")
 async def get_article_by_id(article_id: str):
+    """Lookup by UUID id or by slug — supports both for backward compat."""
+    # Try by ID first (UUID format)
     article = await db.news.find_one({"id": article_id, "is_active": True}, {"_id": 0})
+    if not article:
+        # Fall back to slug lookup
+        article = await db.news.find_one({"slug": article_id, "is_active": True}, {"_id": 0})
     if not article:
         raise HTTPException(status_code=404, detail="Article not found")
     return article

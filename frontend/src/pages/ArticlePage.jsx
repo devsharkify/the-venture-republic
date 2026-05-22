@@ -99,7 +99,7 @@ export default function ArticlePage() {
   const title = article ? (language === "en" ? article.title : (article.title_te || article.title)) : "";
   const summary = article ? (language === "en" ? article.summary : (article.summary_te || article.summary)) : "";
   const category = article ? (language === "en" ? article.category_label : (article.category_label_te || article.category_label)) : "";
-  const shareUrl = `https://www.theventurerepublic.in/news/${id}`;
+  const shareUrl = `https://www.theventurerepublic.in/news/${article?.slug || id}`;
 
   // document.title managed by <Helmet> below
 
@@ -218,7 +218,7 @@ export default function ArticlePage() {
         <meta property="og:title" content={article.og_title || article.title} />
         <meta property="og:description" content={(article.og_description || article.summary || '').slice(0, 160)} />
         <meta property="og:image" content={article.og_image || article.image} />
-        <meta property="og:url" content={`https://venturerepublic.in/news/${article.id}`} />
+        <meta property="og:url" content={`https://www.theventurerepublic.in/news/${article.slug || article.id}`} />
         <meta property="og:type" content="article" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={article.og_title || article.title} />

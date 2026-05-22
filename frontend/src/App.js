@@ -152,9 +152,9 @@ function AppContent() {
 
   const openArticle = useCallback((article, list = []) => {
     // Open as full page instead of modal
-    const articleId = article._id || article.id;
-    if (articleId) {
-      navigate(`/news/${articleId}`);
+    const articleSlug = article.slug || article._id || article.id;
+    if (articleSlug) {
+      navigate(`/news/${articleSlug}`);
     }
   }, [navigate]);
 
