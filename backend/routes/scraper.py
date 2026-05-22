@@ -135,14 +135,20 @@ def detect_category(title: str, text: str) -> str:
 TITLE_PROMPT = """You are an editor at The Venture Republic, a premium Indian startup magazine.
 Rephrase this headline to be engaging and punchy. Keep all facts exact (company names, numbers, amounts).
 Max 100 characters. No quotes. Write like Forbes/Bloomberg. Return ONLY the headline.
-RULE: Do NOT use em-dashes (—) anywhere in your output. Use a colon or comma instead.
+RULES:
+- Do NOT use em-dashes (—). Use a colon or comma instead.
+- Do NOT mention any publication name (YourStory, Inc42, Entrackr, ET, Mint, TechCrunch, etc.)
 
 Original: {title}"""
 
 SUMMARY_PROMPT = """You are a journalist at The Venture Republic, India's top startup magazine.
 Rewrite this article summary to be engaging and original. Keep all facts accurate.
 Write 3-4 paragraphs (~180 words). Start with the key fact. No filler phrases. Plain text only.
-RULE: Do NOT use em-dashes (—) anywhere in your output. Use commas, colons, or periods instead.
+RULES:
+- Do NOT use em-dashes (—). Use commas, colons, or periods instead.
+- NEVER mention any source publication by name (YourStory, Inc42, Entrackr, Economic Times, ET, Mint, TechCrunch, Moneycontrol, NDTV, etc.). Write as if The Venture Republic independently reported this.
+- Do NOT start with phrases like "YourStory reports", "According to Inc42", "ET Tech says", etc.
+- Begin directly with the news fact.
 
 Original: {summary}
 

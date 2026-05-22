@@ -1,14 +1,7 @@
 import { useContext } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { AppContext } from "../App";
-import { Moon, Sun, Settings, ArrowLeft, Bookmark, Newspaper, Video, Rocket } from "lucide-react";
-
-const NAV_SECTIONS = [
-  { label: "Videos",        path: "/videos",        icon: Video },
-  { label: "ePaper",        path: "/epaper",         icon: Newspaper },
-  { label: "Startup Apply", path: "/startup-apply",  icon: Rocket },
-  { label: "Saved",         path: "/saved",          icon: Bookmark },
-];
+import { Moon, Sun, Settings, ArrowLeft } from "lucide-react";
 
 export const Header = () => {
   const { darkMode, toggleDarkMode, isAdmin } = useContext(AppContext);
@@ -47,7 +40,7 @@ export const Header = () => {
             {formattedDate}
           </span>
 
-          {/* Center: tagline with flanking rules — hidden on mobile */}
+          {/* Center: tagline — hidden on mobile */}
           <div className="hidden md:flex items-center flex-1 justify-center -translate-x-[5%]">
             <span className="text-[7.5px] font-semibold tracking-[0.18em] uppercase text-slate-400 whitespace-nowrap">
               India&rsquo;s Premier Startup Intelligence Platform
@@ -97,7 +90,7 @@ export const Header = () => {
             )}
           </div>
 
-          {/* Center: tagline + masthead title */}
+          {/* Center: masthead title */}
           <div
             className="flex flex-col items-center cursor-pointer select-none"
             data-testid="logo"
@@ -117,7 +110,7 @@ export const Header = () => {
             />
           </div>
 
-          {/* Right: full icon row */}
+          {/* Right: admin + dark mode */}
           <div className="flex items-center gap-1 w-[80px] justify-end">
             {isAdmin && (
               <button
@@ -134,7 +127,7 @@ export const Header = () => {
               </button>
             )}
 
-            {/* Dark mode toggle (visible on mobile; desktop uses utility bar) */}
+            {/* Dark mode toggle (mobile only) */}
             <button
               onClick={toggleDarkMode}
               className={`p-2.5 rounded-lg transition-all md:hidden ${
@@ -146,70 +139,11 @@ export const Header = () => {
             >
               {darkMode ? <Sun size={18} /> : <Moon size={18} />}
             </button>
-
           </div>
         </div>
       </div>
 
-      {/* ── Layer 3: Section nav bar ── */}
-      <div
-        className={`${
-          darkMode
-            ? "bg-[#0A0F1C] border-b border-slate-800"
-            : "bg-white border-b border-slate-100"
-        }`}
-      >
-        <div className="max-w-screen-xl mx-auto px-4 flex items-center gap-1 overflow-x-auto hide-scrollbar">
-          {NAV_SECTIONS.map(({ label, path, icon: Icon }) => {
-            const isActive = location.pathname === path;
-            return (
-              <button
-                key={path}
-                onClick={() => navigate(path)}
-                className={`
-                  flex items-center gap-1.5 flex-shrink-0
-                  px-3 py-2 text-[10px] font-bold uppercase tracking-[0.15em]
-                  transition-colors duration-150
-                  border-b-2
-                  ${isActive
-                    ? "text-[#0F172A] border-[#0F172A]"
-                    : darkMode
-                      ? "text-slate-500 border-transparent hover:text-slate-300"
-                      : "text-slate-400 border-transparent hover:text-slate-700"
-                  }
-                `}
-              >
-                <Icon size={11} strokeWidth={2.2} />
-                {label}
-              </button>
-            );
-          })}
-
-          {/* Right side: utility links (desktop only) */}
-          <div className="ml-auto hidden md:flex items-center gap-3 pl-4">
-            {[
-              { label: "About",         path: "/about" },
-              { label: "Advertise",     path: "/advertise" },
-              { label: "Write for Us",  path: "/write-for-us" },
-              { label: "Contact",       path: "/contact" },
-            ].map(({ label, path }) => (
-              <button
-                key={path}
-                onClick={() => navigate(path)}
-                className={`text-[9.5px] font-semibold tracking-wide whitespace-nowrap transition-colors ${
-                  darkMode
-                    ? "text-slate-600 hover:text-slate-400"
-                    : "text-slate-400 hover:text-slate-600"
-                }`}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* ── Layer 4: Bottom accent border ── */}
+      {/* ── Layer 3: Bottom accent border ── */}
       <div className="border-b-2 border-[#0F172A]" />
     </header>
   );

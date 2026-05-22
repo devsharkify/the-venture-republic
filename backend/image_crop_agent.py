@@ -19,17 +19,9 @@ HEADERS     = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Ap
 UPLOADS_DIR = os.path.join(os.path.dirname(__file__), "uploads")
 BASE_URL    = "https://www.theventurerepublic.in/uploads"
 
-# How many rows/columns to crop per position (fraction of image dimension)
-CROP_FRACTIONS = {
-    "bottom-right": {"bottom": 0.13, "right":  0.0},  # crop bottom 13%
-    "bottom-left":  {"bottom": 0.13, "left":   0.0},
-    "top-right":    {"top":    0.10, "right":  0.0},
-    "top-left":     {"top":    0.10, "left":   0.0},
-    "bottom":       {"bottom": 0.13},
-    "top":          {"top":    0.10},
-    "right":        {"right":  0.12},
-    "left":         {"left":   0.12},
-}
+# Zoom-in: crop all 4 edges uniformly so any corner logo is removed.
+# The image looks "zoomed in" on the subject — no edge logos survive.
+ZOOM_CROP = 0.12   # crop 12% from each side (24% total reduction per axis)
 
 POSITION_PROMPT = (
     "Does this image contain a publication logo, watermark, or media outlet branding "
@@ -87,28 +79,28 @@ async def ask_gemini_position(session, img_b64: str, ct: str):
         return None
 
 def crop_image(img_bytes: bytes, position: str, size: str):
-    """Crop the logo area from the image and return new JPEG bytes."""
+    """
+    Zoom-in crop: remove ZOOM_CROP fraction from ALL 4 sides.
+    This eliminates corner/edge logos regardless of position and
+    gives a natural "zoomed in" look on the subject.
+    """
     try:
         img = Image.open(io.BytesIO(img_bytes)).convert("RGB")
         w, h = img.size
 
-        # Increase crop fraction slightly for larger logos
-        scale = 1.0 if size in ("tiny", "small") else 1.5 if size == "medium" else 2.0
+        # Slightly more aggressive for larger logos
+        z = ZOOM_CROP * (1.4 if size in ("medium", "large") else 1.0)
 
-        fracs = CROP_FRACTIONS.get(position)
-        if not fracs:
-            return None  # unknown/center — can't easily crop
+        left   = int(w * z)
+        top    = int(h * z)
+        right  = w - int(w * z)
+        bottom = h - int(h * z)
 
-        left   = int(w * fracs.get("left",   0) * scale)
-        top    = int(h * fracs.get("top",    0) * scale)
-        right  = w - int(w * fracs.get("right",  0) * scale)
-        bottom = h - int(h * fracs.get("bottom", 0) * scale)
-
-        # Clamp to valid bounds
+        # Clamp
         left   = max(0, min(left,   w - 1))
         top    = max(0, min(top,    h - 1))
-        right  = max(left + 1, min(right,  w))
-        bottom = max(top + 1,  min(bottom, h))
+        right  = max(left + 10, min(right,  w))
+        bottom = max(top + 10,  min(bottom, h))
 
         cropped = img.crop((left, top, right, bottom))
         buf = io.BytesIO()
@@ -140,10 +132,12 @@ async def process_group(group_id: int, articles: list, col, sem: asyncio.Semapho
             title  = art["title"][:52]
             source = art["source"]
 
-            # Skip already-local images (already cropped)
+            # Skip already-local images only if they were zoom-cropped
+            # (files > 50KB in uploads are fine; skip re-processing)
             if "theventurerepublic.in/uploads" in url:
                 no_logo.append(art_id)
                 continue
+
 
             async with sem:
                 raw_bytes, img_b64, ct = await fetch_image_bytes(session, url)
@@ -166,13 +160,7 @@ async def process_group(group_id: int, articles: list, col, sem: asyncio.Semapho
             size     = result.get("size", "small")
             print(f"  [G{group_id}] 🔍  logo={position}/{size} [{source}] {title}")
 
-            if position in ("none", "center"):
-                no_logo.append(art_id)
-                print(f"  [G{group_id}]    → center/none — skipping crop")
-                await asyncio.sleep(0.2)
-                continue
-
-            # Crop the logo area
+            # Zoom-in crop handles any position (all 4 edges)
             new_bytes = crop_image(raw_bytes, position, size)
             if not new_bytes:
                 skipped.append(art_id)
