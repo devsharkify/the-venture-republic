@@ -1,3 +1,9 @@
+import os as _os
+# Load .env if running locally
+try:
+    from dotenv import load_dotenv as _lde; _lde()
+except ImportError:
+    pass
 """
 Watermark Scanner — The Venture Republic
 Scans all articles in MongoDB via Gemini Vision and deletes watermarked ones.
@@ -13,7 +19,7 @@ from datetime import datetime
 
 MONGO_URL = "mongodb+srv://admin:sscBnar6pLNqaaL7@cluster0.tuk1rfj.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
 DB_NAME = "venture_republic"
-GEMINI_KEY = "AIzaSyCiNXpR7YG2TZK0nHZUzOUIWIYb0-RMUio"
+GEMINI_KEY  = _os.getenv("GEMINI_API_KEY", "")
 GEMINI_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={GEMINI_KEY}"
 HEADERS = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/120 Safari/537.36"}
 

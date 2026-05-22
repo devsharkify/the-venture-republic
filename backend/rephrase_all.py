@@ -1,3 +1,9 @@
+import os as _os
+# Load .env if running locally
+try:
+    from dotenv import load_dotenv as _lde; _lde()
+except ImportError:
+    pass
 """
 Re-rephrase all existing articles — The Venture Republic
 - Strips source publication names from summaries and titles
@@ -11,7 +17,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from datetime import datetime
 
 MONGO_URL  = "mongodb+srv://admin:sscBnar6pLNqaaL7@cluster0.tuk1rfj.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
-GEMINI_KEY = "AIzaSyCiNXpR7YG2TZK0nHZUzOUIWIYb0-RMUio"
+GEMINI_KEY  = _os.getenv("GEMINI_API_KEY", "")
 GEMINI_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={GEMINI_KEY}"
 
 TITLE_PROMPT = """You are an editor at The Venture Republic, India's top startup magazine.
