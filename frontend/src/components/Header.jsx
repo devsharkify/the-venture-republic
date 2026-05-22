@@ -1,7 +1,14 @@
 import { useContext } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { AppContext } from "../App";
-import { Moon, Sun, Settings, ArrowLeft } from "lucide-react";
+import { Moon, Sun, Settings, ArrowLeft, Bookmark, Newspaper, Video, Rocket } from "lucide-react";
+
+const NAV_SECTIONS = [
+  { label: "Videos",        path: "/videos",        icon: Video },
+  { label: "ePaper",        path: "/epaper",         icon: Newspaper },
+  { label: "Startup Apply", path: "/startup-apply",  icon: Rocket },
+  { label: "Saved",         path: "/saved",          icon: Bookmark },
+];
 
 export const Header = () => {
   const { darkMode, toggleDarkMode, isAdmin } = useContext(AppContext);
@@ -144,7 +151,65 @@ export const Header = () => {
         </div>
       </div>
 
-      {/* ── Layer 3: Bottom accent border ── */}
+      {/* ── Layer 3: Section nav bar ── */}
+      <div
+        className={`${
+          darkMode
+            ? "bg-[#0A0F1C] border-b border-slate-800"
+            : "bg-white border-b border-slate-100"
+        }`}
+      >
+        <div className="max-w-screen-xl mx-auto px-4 flex items-center gap-1 overflow-x-auto hide-scrollbar">
+          {NAV_SECTIONS.map(({ label, path, icon: Icon }) => {
+            const isActive = location.pathname === path;
+            return (
+              <button
+                key={path}
+                onClick={() => navigate(path)}
+                className={`
+                  flex items-center gap-1.5 flex-shrink-0
+                  px-3 py-2 text-[10px] font-bold uppercase tracking-[0.15em]
+                  transition-colors duration-150
+                  border-b-2
+                  ${isActive
+                    ? "text-[#0F172A] border-[#0F172A]"
+                    : darkMode
+                      ? "text-slate-500 border-transparent hover:text-slate-300"
+                      : "text-slate-400 border-transparent hover:text-slate-700"
+                  }
+                `}
+              >
+                <Icon size={11} strokeWidth={2.2} />
+                {label}
+              </button>
+            );
+          })}
+
+          {/* Right side: utility links (desktop only) */}
+          <div className="ml-auto hidden md:flex items-center gap-3 pl-4">
+            {[
+              { label: "About",         path: "/about" },
+              { label: "Advertise",     path: "/advertise" },
+              { label: "Write for Us",  path: "/write-for-us" },
+              { label: "Contact",       path: "/contact" },
+            ].map(({ label, path }) => (
+              <button
+                key={path}
+                onClick={() => navigate(path)}
+                className={`text-[9.5px] font-semibold tracking-wide whitespace-nowrap transition-colors ${
+                  darkMode
+                    ? "text-slate-600 hover:text-slate-400"
+                    : "text-slate-400 hover:text-slate-600"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* ── Layer 4: Bottom accent border ── */}
       <div className="border-b-2 border-[#0F172A]" />
     </header>
   );
