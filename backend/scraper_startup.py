@@ -1,4 +1,4 @@
-import asyncio, calendar, email.utils, uuid
+import asyncio, calendar, email.utils, uuid, re
 from datetime import datetime, timezone
 import feedparser, aiohttp
 from bs4 import BeautifulSoup
@@ -69,6 +69,14 @@ def is_india(t, tx):
     combined = (t + " " + tx[:3000]).lower()
     return any(k in combined for k in INDIA_WORDS)
 
+def make_slug(title):
+    words = title.lower().split()[:9]
+    slug = "-".join(words)
+    slug = re.sub(r"[₹$\[\](){}#@!%^&*,.;:\"'|<>?/\\]+", "", slug)
+    slug = re.sub(r"-{2,}", "-", slug)
+    slug = slug.strip("-")
+    return slug
+
 def parse_date(e):
     for a in ("published_parsed","updated_parsed"):
         t = getattr(e, a, None)
@@ -131,6 +139,11 @@ async def main():
     col = db.news
     seen = await get_seen(col)
     print(f"Existing in DB: {len(seen)}\n")
+    # Seed seen_slugs from existing DB records to avoid collisions on re-runs
+    seen_slugs = set()
+    async for d in col.find({}, {"slug": 1}):
+        if d.get("slug"):
+            seen_slugs.add(d["slug"])
     saved = 0
     sem = asyncio.Semaphore(8)
 
@@ -169,9 +182,20 @@ async def main():
                     continue
 
                 cat, label = detect_cat(title, text)
+
+                # Generate unique slug
+                base_slug = make_slug(title)
+                slug = base_slug
+                counter = 2
+                while slug in seen_slugs or await col.count_documents({"slug": slug}) > 0:
+                    slug = f"{base_slug}-{counter}"
+                    counter += 1
+                seen_slugs.add(slug)
+
                 doc = {
                     "id": str(uuid.uuid4()),
                     "title": title,
+                    "slug": slug,
                     "summary": text or title,
                     "category": cat,
                     "category_label": label,
