@@ -97,7 +97,7 @@ export const Header = () => {
             onClick={() => navigate("/")}
           >
             <span
-              className={`font-serif-display text-[28px] md:text-[36px] font-black tracking-tight leading-none ${
+              className={`font-serif-display text-[22px] sm:text-[28px] md:text-[36px] font-black tracking-tight leading-none whitespace-nowrap ${
                 darkMode ? "text-white" : "text-slate-900"
               }`}
             >
