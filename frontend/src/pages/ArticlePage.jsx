@@ -5,6 +5,10 @@ import { Helmet } from "react-helmet-async";
 import { API, AppContext } from "../App";
 import { Clock, ArrowLeft, Share2, Link2, Check } from "lucide-react";
 
+function stripHtml(html) {
+  return (html || "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+}
+
 const DEFAULT_IMAGES = {
   funding: "https://images.pexels.com/photos/6950229/pexels-photo-6950229.jpeg?auto=compress&cs=tinysrgb&w=400",
   startup: "https://images.pexels.com/photos/3184338/pexels-photo-3184338.jpeg?auto=compress&cs=tinysrgb&w=400",
@@ -116,11 +120,11 @@ export default function ArticlePage() {
     } catch { return ""; }
   };
 
-  const shareText = `${title}\n\n${(summary || "").slice(0, 180)}...\n\n${shareUrl}`;
+  const shareText = `${title}\n\n${stripHtml(summary).slice(0, 180)}...\n\n${shareUrl}`;
 
   const handleShare = () => {
     if (navigator.share) {
-      navigator.share({ title, text: (summary || "").slice(0, 200), url: shareUrl }).catch(() => {});
+      navigator.share({ title, text: stripHtml(summary).slice(0, 200), url: shareUrl }).catch(() => {});
     } else {
       window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, "_blank");
     }

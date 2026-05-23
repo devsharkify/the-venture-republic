@@ -50,8 +50,12 @@ function formatDate(dateStr) {
   }
 }
 
+function stripHtml(html) {
+  return (html || "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+}
+
 function readTimeMin(text) {
-  return Math.max(1, Math.ceil((text || "").split(/\s+/).filter(Boolean).length / 200));
+  return Math.max(1, Math.ceil(stripHtml(text || "").split(/\s+/).filter(Boolean).length / 200));
 }
 
 // ─── HeroCard ────────────────────────────────────────────────────────────────
@@ -108,7 +112,7 @@ function HeroCard({ article, darkMode, language }) {
         <p className={`text-[13px] leading-relaxed line-clamp-2 mb-3 ${
           darkMode ? "text-slate-400" : "text-slate-500"
         } ${language === "te" ? "font-telugu" : ""}`}>
-          {summary}
+          {stripHtml(summary)}
         </p>
 
         <div className={`flex items-center gap-2 text-[11px] ${darkMode ? "text-slate-500" : "text-slate-400"}`}>

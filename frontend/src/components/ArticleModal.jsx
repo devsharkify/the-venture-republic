@@ -6,6 +6,10 @@ import { Bookmark, BookmarkCheck, Clock, Share2, X, ChevronLeft, ChevronRight, H
 import { formatDistanceToNow } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
 
+function stripHtml(html) {
+  return (html || "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+}
+
 const SWIPE_THRESHOLD = 80;
 
 export const ArticleModal = () => {
@@ -85,9 +89,10 @@ export const ArticleModal = () => {
   const handleShare = () => {
     // Share the branded theventurerepublic.in URL so the unfurl card shows the The Venture Republic domain.
     const shareUrl = `https://www.theventurerepublic.in/news/${article.slug || article.id}`;
-    const shareText = `${title}\n\n${summary?.slice(0, 180)}...\n\n${shareUrl}`;
+    const plainSummary = stripHtml(summary);
+    const shareText = `${title}\n\n${plainSummary.slice(0, 180)}...\n\n${shareUrl}`;
     if (navigator.share) {
-      navigator.share({ title, text: summary?.slice(0, 200), url: shareUrl }).catch(() => {});
+      navigator.share({ title, text: plainSummary.slice(0, 200), url: shareUrl }).catch(() => {});
     } else {
       window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, "_blank");
     }

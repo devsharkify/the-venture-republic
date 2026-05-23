@@ -3,6 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { AppContext } from "../App";
 import { Bookmark, BookmarkCheck, Clock, Share2, Pencil } from "lucide-react";
 
+function stripHtml(html) {
+  return (html || "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+}
+
 // Source portal URLs for attribution
 const SOURCE_URLS = {
   "ET Startups": "https://economictimes.indiatimes.com/small-biz/startups",
@@ -66,9 +70,10 @@ export const NewsCard = ({ article, index = 0, articlesList = [] }) => {
   const handleShare = (e) => {
     e.stopPropagation();
     const shareUrl = `https://www.theventurerepublic.in/news/${article.slug || article.id}`;
-    const shareText = `${title}\n\n${(summary || "").slice(0, 180)}...\n\n${shareUrl}`;
+    const plainSummary = stripHtml(summary);
+    const shareText = `${title}\n\n${plainSummary.slice(0, 180)}...\n\n${shareUrl}`;
     if (navigator.share) {
-      navigator.share({ title, text: (summary || "").slice(0, 200), url: shareUrl }).catch(() => {});
+      navigator.share({ title, text: plainSummary.slice(0, 200), url: shareUrl }).catch(() => {});
       return;
     }
     window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, "_blank");
