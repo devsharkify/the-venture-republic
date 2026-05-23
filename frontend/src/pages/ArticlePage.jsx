@@ -345,9 +345,10 @@ export default function ArticlePage() {
           </div>
 
           {/* Body */}
-          <div className={`text-base leading-relaxed whitespace-pre-line ${darkMode ? "text-slate-300" : "text-slate-700"}`}>
-            {summary}
-          </div>
+          <div
+            className={`article-body text-base leading-relaxed ${darkMode ? "text-slate-300 article-body-dark" : "text-slate-700"}`}
+            dangerouslySetInnerHTML={{ __html: summary }}
+          />
 
           {/* Mobile: show related articles below body */}
           {relatedArticles.length > 0 && (

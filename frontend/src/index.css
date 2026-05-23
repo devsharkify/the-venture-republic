@@ -207,3 +207,50 @@ body {
     display: contents !important;
   }
 }
+
+/* ── Article body HTML rendering ───────────────────────────────────────────── */
+.article-body h2 {
+  font-size: 1.35rem;
+  font-weight: 800;
+  line-height: 1.3;
+  margin-top: 0;
+  margin-bottom: 0.75rem;
+  color: #0F172A;
+  font-family: 'Playfair Display', Georgia, serif;
+  letter-spacing: -0.01em;
+}
+
+.article-body h3 {
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-top: 1.4rem;
+  margin-bottom: 0.45rem;
+  color: #0F172A;
+  border-left: 3px solid #0F172A;
+  padding-left: 0.6rem;
+}
+
+.article-body p {
+  margin-bottom: 0.9rem;
+  line-height: 1.75;
+}
+
+.article-body p:last-child {
+  margin-bottom: 0;
+}
+
+/* Dark mode overrides */
+.article-body-dark h2 {
+  color: #f1f5f9;
+}
+
+.article-body-dark h3 {
+  color: #94a3b8;
+  border-left-color: #475569;
+}
+
+.article-body-dark p {
+  color: #cbd5e1;
+}

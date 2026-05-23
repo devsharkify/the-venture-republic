@@ -31,14 +31,23 @@ Return ONLY the rephrased headline, nothing else.
 Original: {title}"""
 
 SUMMARY_PROMPT = """You are a journalist at The Venture Republic, India's top startup magazine.
-Rewrite this article summary as original TVR reporting. Keep all facts accurate. 3-4 paragraphs, ~180 words.
+Rewrite this article as original TVR reporting. Return structured HTML only — no markdown, no code fences.
+
+FORMAT (use exactly these HTML tags):
+<h2>One punchy article headline (max 100 chars)</h2>
+<p>Opening paragraph — lead with the key news fact. 2-3 sentences.</p>
+<h3>Sub-headline for next section (e.g. "The Deal", "What This Means", "Investor Backing", "Founders' Vision")</h3>
+<p>Second paragraph — context, details, amounts, investors. 2-3 sentences.</p>
+<h3>Sub-headline for next section</h3>
+<p>Third paragraph — market impact, what's next, or broader significance. 2-3 sentences.</p>
+
 RULES:
 - Do NOT use em-dashes (—). Use commas, colons, or periods.
 - NEVER mention any source publication (YourStory, Inc42, Entrackr, Economic Times, ET, Mint, TechCrunch, Moneycontrol, NDTV, The Tech Panda, StartupTalky, etc.)
-- Do NOT start with "YourStory reports", "According to", "ET Tech says", etc.
+- Do NOT start with "YourStory reports", "According to", "ET Tech says" etc.
 - Write as if The Venture Republic independently reported this story.
-- Start directly with the key news fact.
-Return ONLY the rewritten summary.
+- Keep all facts, numbers, company names, and amounts exactly accurate.
+- Return ONLY the HTML — nothing before or after it.
 
 Original: {summary}"""
 

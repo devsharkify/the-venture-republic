@@ -274,9 +274,10 @@ export const ArticleModal = () => {
             <h1 className={`text-xl md:text-2xl font-bold mb-4 leading-tight ${darkMode ? "text-white" : "text-slate-900"} ${language === "te" ? "font-telugu" : ""}`}>
               {title}
             </h1>
-            <p className={`text-base leading-relaxed mb-6 ${darkMode ? "text-slate-300" : "text-slate-700"} ${language === "te" ? "font-telugu" : ""}`}>
-              {summary}
-            </p>
+            <div
+              className={`article-body text-base leading-relaxed mb-6 ${darkMode ? "text-slate-300 article-body-dark" : "text-slate-700"} ${language === "te" ? "font-telugu" : ""}`}
+              dangerouslySetInnerHTML={{ __html: summary }}
+            />
             {article.seo_keywords?.length > 0 && (
               <div className="flex flex-wrap gap-1.5 mb-4" data-testid="article-seo-tags">
                 {article.seo_keywords.map((tag, i) => (
