@@ -32,7 +32,9 @@ import Disclaimer from "./pages/Disclaimer";
 import AdvertisePage from "./pages/AdvertisePage";
 import WriteForUs from "./pages/WriteForUs";
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || "https://api.venturerepublic.in";
+// Use relative URL in production so API calls go to the same origin as the page.
+// Set REACT_APP_BACKEND_URL=http://localhost:8080 in .env.local for local dev.
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || "";
 export const API = `${BACKEND_URL}/api`;
 
 // Attach admin phone header automatically on every request made by the logged-in admin.

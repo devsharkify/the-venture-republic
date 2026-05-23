@@ -15,7 +15,7 @@ COPY frontend/ .
 RUN DISABLE_ESLINT_PLUGIN=true \
     SKIP_PREFLIGHT_CHECK=true \
     GENERATE_SOURCEMAP=false \
-    REACT_APP_BACKEND_URL=https://api.venturerepublic.in \
+    REACT_APP_BACKEND_URL="" \
     npm run build
 
 # ── Stage 2: Python backend (serves API + React build) ───────────────────────
