@@ -9,6 +9,37 @@ function stripHtml(html) {
   return (html || "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
 }
 
+/** Detect if a string contains real HTML tags */
+function hasHtmlTags(text) {
+  return /<[a-z][\s\S]*?>/i.test(text || "");
+}
+
+/** Render article body — HTML or plain text with auto paragraph breaks */
+function ArticleBody({ content, darkMode }) {
+  const cls = `article-body text-base leading-relaxed ${darkMode ? "text-slate-300 article-body-dark" : "text-slate-700"}`;
+
+  if (!content) return null;
+
+  if (hasHtmlTags(content)) {
+    return (
+      <div
+        className={cls}
+        dangerouslySetInnerHTML={{ __html: content }}
+      />
+    );
+  }
+
+  // Plain text — split on double newlines and render as <p> tags
+  const paragraphs = content.split(/\n\n+/).map(p => p.trim()).filter(Boolean);
+  return (
+    <div className={cls}>
+      {paragraphs.map((p, i) => (
+        <p key={i} className="mb-4">{p}</p>
+      ))}
+    </div>
+  );
+}
+
 const DEFAULT_IMAGES = {
   funding: "https://images.pexels.com/photos/6950229/pexels-photo-6950229.jpeg?auto=compress&cs=tinysrgb&w=400",
   startup: "https://images.pexels.com/photos/3184338/pexels-photo-3184338.jpeg?auto=compress&cs=tinysrgb&w=400",
@@ -349,10 +380,7 @@ export default function ArticlePage() {
           </div>
 
           {/* Body */}
-          <div
-            className={`article-body text-base leading-relaxed ${darkMode ? "text-slate-300 article-body-dark" : "text-slate-700"}`}
-            dangerouslySetInnerHTML={{ __html: summary }}
-          />
+          <ArticleBody content={summary} darkMode={darkMode} />
 
           {/* Mobile: show related articles below body */}
           {relatedArticles.length > 0 && (

@@ -11,10 +11,14 @@ Re-rephrase all existing articles — The Venture Republic
 - 10 parallel workers via asyncio
 Run: python3 rephrase_all.py
 """
-import asyncio, json
+import asyncio, json, re
 import aiohttp
 from motor.motor_asyncio import AsyncIOMotorClient
 from datetime import datetime
+
+def strip_html(text: str) -> str:
+    """Remove HTML tags and collapse whitespace."""
+    return re.sub(r'\s+', ' ', re.sub(r'<[^>]+>', ' ', text or '')).strip()
 
 MONGO_URL  = "mongodb+srv://admin:sscBnar6pLNqaaL7@cluster0.tuk1rfj.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
 GEMINI_KEY  = _os.getenv("GEMINI_API_KEY", "")
@@ -33,10 +37,9 @@ Original: {title}"""
 SUMMARY_PROMPT = """You are a journalist at The Venture Republic, India's top startup magazine.
 Rewrite this article as original TVR reporting. Return structured HTML only — no markdown, no code fences.
 
-FORMAT (use exactly these HTML tags):
-<h2>One punchy article headline (max 100 chars)</h2>
+FORMAT (use exactly these HTML tags, in this exact order):
 <p>Opening paragraph — lead with the key news fact. 2-3 sentences.</p>
-<h3>Sub-headline for next section (e.g. "The Deal", "What This Means", "Investor Backing", "Founders' Vision")</h3>
+<h3>Sub-headline for next section (e.g. "The Deal", "What This Means", "Investor Backing", "Founders' Vision", "Market Outlook")</h3>
 <p>Second paragraph — context, details, amounts, investors. 2-3 sentences.</p>
 <h3>Sub-headline for next section</h3>
 <p>Third paragraph — market impact, what's next, or broader significance. 2-3 sentences.</p>
@@ -49,9 +52,10 @@ RULES:
 - Keep all facts, numbers, company names, and amounts exactly accurate.
 - Return ONLY the HTML — nothing before or after it.
 
-Original: {summary}"""
+Original article text:
+{summary}"""
 
-async def call_gemini(session: aiohttp.ClientSession, prompt: str, max_tokens: int = 600):
+async def call_gemini(session: aiohttp.ClientSession, prompt: str, max_tokens: int = 1200):
     payload = {
         "contents": [{"parts": [{"text": prompt}]}],
         "generationConfig": {"temperature": 0.7, "maxOutputTokens": max_tokens},
@@ -85,12 +89,19 @@ def has_source_mention(text: str) -> bool:
     return any(s in t for s in SOURCE_NAMES)
 
 async def process_article(worker_id: int, art: dict, col, session: aiohttp.ClientSession, sem: asyncio.Semaphore, stats: dict):
-    art_id  = art["id"]
-    title   = art.get("title", "")
-    summary = art.get("summary", "")
+    art_id      = art["id"]
+    title       = art.get("title", "")
+    summary     = art.get("summary", "")
+    summary_orig = art.get("summary_orig", "")
 
-    title_needs  = has_source_mention(title)
-    summary_needs = has_source_mention(summary) or (summary and len(summary) > 60)
+    # Use summary_orig (raw scraped text) as source — strip any HTML from it
+    # Fall back to current summary if summary_orig is too short
+    raw_orig = strip_html(summary_orig)
+    raw_curr = strip_html(summary)
+    input_text = raw_orig if len(raw_orig) >= 100 else raw_curr
+
+    title_needs   = has_source_mention(title)
+    summary_needs = len(input_text) >= 100  # Only rephrase when there's real content
 
     if not title_needs and not summary_needs:
         stats["skipped"] += 1
@@ -107,13 +118,13 @@ async def process_article(worker_id: int, art: dict, col, session: aiohttp.Clien
             updates["og_title"] = new_title
             print(f"  [W{worker_id}] 📝 title: {new_title[:65]}")
 
-    # Always rephrase summary (remove source mentions + improve quality)
-    if summary_needs and summary and len(summary) > 60:
+    # Rephrase summary using original source text (not truncated current summary)
+    if summary_needs:
         async with sem:
-            new_summary = await call_gemini(session, SUMMARY_PROMPT.format(summary=summary[:1500]), max_tokens=600)
-        if new_summary and len(new_summary) > 50:
+            new_summary = await call_gemini(session, SUMMARY_PROMPT.format(summary=input_text[:2000]), max_tokens=1200)
+        if new_summary and len(new_summary) > 80:
             updates["summary"] = new_summary
-            updates["og_description"] = new_summary[:300]
+            updates["og_description"] = strip_html(new_summary)[:300]
 
     if updates:
         updates["updated_at"] = datetime.utcnow().isoformat()
@@ -137,13 +148,14 @@ async def main():
     articles = []
     async for doc in col.find(
         {"is_active": True},
-        {"id": 1, "title": 1, "summary": 1, "source": 1}
+        {"id": 1, "title": 1, "summary": 1, "summary_orig": 1, "source": 1}
     ):
         articles.append({
-            "id":      str(doc.get("id", "")),
-            "title":   str(doc.get("title", "")),
-            "summary": str(doc.get("summary", "")),
-            "source":  str(doc.get("source", "")),
+            "id":           str(doc.get("id", "")),
+            "title":        str(doc.get("title", "")),
+            "summary":      str(doc.get("summary", "")),
+            "summary_orig": str(doc.get("summary_orig", "")),
+            "source":       str(doc.get("source", "")),
         })
 
     total = len(articles)
